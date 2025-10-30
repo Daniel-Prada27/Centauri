@@ -24,27 +24,75 @@ model users_sync {
 }
 
 model User {
-    id         String  @id @default(uuid())
-    user_id    String  @unique
+    // id         String  @id @default(uuid()) @db.Uuid
+    user_id    String  @id @unique
     occupation String  @db.VarChar(50)
     location   String? @db.VarChar(40)
     picture    String? @db.VarChar(200)
 
     user_sync users_sync @relation(fields: [user_id], references: [id])
-    teams Team[] // Relación implícita de muchos a muchos con Team
+
+    Teams   Team[] // Relación implícita de muchos a muchos con Team
+    Task    Task[]
+    Comment Comment[]
 
     @@schema("public")
 }
 
 model Team {
-    id          String   @id @default(uuid())
-    name        String   @db.VarChar(50)
-    description String   @db.VarChar(400)
+    id          String @id @default(uuid()) @db.Uuid
+    name        String @db.VarChar(50)
+    description String @db.VarChar(400)
 
-    members User[] // Relación implícita de muchos a muchos con User
+    Members User[] // Relación implícita de muchos a muchos con User
+
+    Tasks Task[] // Relacion inversa de uno a muchos con Task
 
     @@schema("public")
 }
 
+model Task {
+    id             String   @id @default(uuid()) @db.Uuid
+    id_team        String   @db.Uuid
+    id_responsible String
+    name           String   @db.VarChar(50)
+    status         String   @db.VarChar(20)
+    priority       String   @db.VarChar(20)
+    type           String   @db.VarChar(30)
+    due_date       DateTime @db.Date //Debe pasasrse como objeto Date() por un bug (documentacion)
 
+    team        Team @relation(fields: [id_team], references: [id])
+    responsible User @relation(fields: [id_responsible], references: [user_id])
 
+    Subtasks Subtask[]
+    Comment Comment[]
+
+    @@index([id_team])
+    @@schema("public")
+}
+
+model Subtask {
+    id      String @id @default(uuid()) @db.Uuid
+    id_task String @db.Uuid
+    name    String @db.VarChar(50)
+    status  String @db.VarChar(20)
+
+    task Task @relation(fields: [id_task], references: [id])
+
+    @@index([id_task])
+    @@schema("public")
+}
+
+model Comment {
+    id        String  @id @default(uuid()) @db.Uuid
+    id_task   String  @db.Uuid
+    id_author String
+    name      String  @db.VarChar(50)
+    edited    Boolean
+    content   String  @db.VarChar(300)
+
+    task   Task @relation(fields: [id_task], references: [id])
+    author User @relation(fields: [id_author], references: [user_id])
+
+    @@schema("public") // Optional schema declaration
+}
