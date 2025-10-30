@@ -35,6 +35,10 @@ model User {
     Teams   Team[] // Relación implícita de muchos a muchos con Team
     Task    Task[]
     Comment Comment[]
+    Event   Event[]   @relation("EventAuthor")
+    Events  Event[]
+    
+    notifications NotificationMember[]
 
     @@schema("public")
 }
@@ -46,7 +50,9 @@ model Team {
 
     Members User[] // Relación implícita de muchos a muchos con User
 
-    Tasks Task[] // Relacion inversa de uno a muchos con Task
+    Tasks        Task[] // Relacion inversa de uno a muchos con Task
+    Event        Event[]
+    Notification Notification[]
 
     @@schema("public")
 }
@@ -65,7 +71,7 @@ model Task {
     responsible User @relation(fields: [id_responsible], references: [user_id])
 
     Subtasks Subtask[]
-    Comment Comment[]
+    Comment  Comment[]
 
     @@index([id_team])
     @@schema("public")
@@ -94,5 +100,50 @@ model Comment {
     task   Task @relation(fields: [id_task], references: [id])
     author User @relation(fields: [id_author], references: [user_id])
 
-    @@schema("public") // Optional schema declaration
+    @@schema("public")
+}
+
+model Event {
+    id          String   @id @default(uuid()) @db.Uuid
+    id_team     String   @db.Uuid
+    id_author   String   @db.Uuid
+    name        String   @db.VarChar(50)
+    description String   @db.VarChar(400)
+    due_date    DateTime @db.Date
+
+    team   Team @relation(fields: [id_team], references: [id])
+    author User @relation("EventAuthor", fields: [id_author], references: [user_id])
+
+    Members User[]
+
+    @@index([id_team])
+    @@schema("public")
+}
+
+model Notification {
+    id            String   @id @default(uuid()) @db.Uuid
+    id_team       String   @db.Uuid
+    type          String   @db.VarChar(30)
+    title         String   @db.VarChar(50)
+    message       String   @db.VarChar(300)
+    creation_date DateTime @db.Date
+    read          Boolean
+
+    team Team @relation(fields: [id_team], references: [id])
+
+    members NotificationMember[]
+
+    @@schema("public")
+}
+
+model NotificationMember {
+    id_member       String
+    id_notification String  @db.Uuid
+    read            Boolean
+
+    member User @relation(fields: [id_member], references: [user_id])
+    notification Notification @relation(fields: [id_notification], references: [id])
+
+    @@id([id_member, id_notification])
+    @@schema("public")
 }
