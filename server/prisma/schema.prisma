@@ -37,8 +37,10 @@ model User {
     Comment Comment[]
     Event   Event[]   @relation("EventAuthor")
     Events  Event[]
-    
-    notifications NotificationMember[]
+
+    notifications    NotificationMember[]
+    MessageAuthor    Message[]            @relation("MessageAuthor")
+    MessageRecipient Message[]
 
     @@schema("public")
 }
@@ -53,6 +55,7 @@ model Team {
     Tasks        Task[] // Relacion inversa de uno a muchos con Task
     Event        Event[]
     Notification Notification[]
+    Channel      Channel[]
 
     @@schema("public")
 }
@@ -141,9 +144,45 @@ model NotificationMember {
     id_notification String  @db.Uuid
     read            Boolean
 
-    member User @relation(fields: [id_member], references: [user_id])
+    member       User         @relation(fields: [id_member], references: [user_id])
     notification Notification @relation(fields: [id_notification], references: [id])
 
     @@id([id_member, id_notification])
+    @@schema("public")
+}
+
+model Channel {
+    id      String @id @default(uuid()) @db.Uuid
+    id_team String @db.Uuid
+
+    team         Team           @relation(fields: [id_team], references: [id])
+    GroupMessage GroupMessage[]
+
+    @@index([id_team])
+    @@schema("public")
+}
+
+model Message {
+    id         String   @id @default(uuid()) @db.Uuid
+    id_from    String   @db.Uuid
+    id_to      String   @db.Uuid
+    content    String   @db.Text
+    created_at DateTime @db.Timestamp(0)
+
+    author    User @relation("MessageAuthor", fields: [id_from], references: [user_id])
+    recipient User @relation(fields: [id_to], references: [user_id])
+
+    @@schema("public")
+}
+
+model GroupMessage {
+    id_channel String   @db.Uuid
+    id_message String   @db.Uuid
+    content    String   @db.Text
+    created_at DateTime @db.Timestamp(0)
+
+    channel Channel @relation(fields: [id_channel], references: [id])
+
+    @@id([id_channel, id_message])
     @@schema("public")
 }
