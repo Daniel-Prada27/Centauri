@@ -13,6 +13,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@prisma/client": "^6.18.0",
+    "@stackframe/js": "^2.8.48",
     "express": "^5.1.0"
   },
   "devDependencies": {
