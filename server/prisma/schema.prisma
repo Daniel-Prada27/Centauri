@@ -12,9 +12,9 @@ datasource db {
 model users_sync {
     raw_json   Json
     id         String    @id @default(dbgenerated("(raw_json ->> 'id'::text)"))
-    name       String? @default(dbgenerated("(raw_json ->> 'display_name'::text)"))
-    email      String? @default(dbgenerated("(raw_json ->> 'primary_email'::text)"))
-    created_at DateTime? @db.Timestamptz(6) @default(dbgenerated("to_timestamp((trunc((((raw_json ->> 'signed_up_at_millis'::text))::bigint)::double precision) / (1000)::double precision))")) 
+    name       String?   @default(dbgenerated("(raw_json ->> 'display_name'::text)"))
+    email      String?   @default(dbgenerated("(raw_json ->> 'primary_email'::text)"))
+    created_at DateTime? @default(dbgenerated("to_timestamp((trunc((((raw_json ->> 'signed_up_at_millis'::text))::bigint)::double precision) / (1000)::double precision))")) @db.Timestamptz(6)
     updated_at DateTime? @db.Timestamptz(6)
     deleted_at DateTime? @db.Timestamptz(6)
     User       User?
@@ -32,7 +32,7 @@ model User {
 
     user_sync users_sync @relation(fields: [user_id], references: [id])
 
-    // Teams   Team[] // Relación implícita de muchos a muchos con Team
+    Teams   Team[] // Relación implícita de muchos a muchos con Team
     Task    Task[]
     Comment Comment[]
     Event   Event[]   @relation("EventAuthor")
@@ -41,7 +41,6 @@ model User {
     notifications    NotificationMember[]
     MessageAuthor    Message[]            @relation("MessageAuthor")
     MessageRecipient Message[]
-    Member           Member[]
 
     @@schema("public")
 }
@@ -51,26 +50,13 @@ model Team {
     name        String @db.VarChar(50)
     description String @db.VarChar(400)
 
-    // Members User[] // Relación implícita de muchos a muchos con User
+    Members User[] // Relación implícita de muchos a muchos con User
 
     Tasks        Task[] // Relacion inversa de uno a muchos con Task
     Event        Event[]
     Notification Notification[]
     Channel      Channel[]
-    Member       Member[]
 
-    @@schema("public")
-}
-
-model Member {
-    user_id String
-    team_id String @db.Uuid
-    role    String @db.VarChar(30)
-
-    user User @relation(fields: [user_id], references: [user_id])
-    team Team @relation(fields: [team_id], references: [id])
-
-    @@id([user_id, team_id])
     @@schema("public")
 }
 
