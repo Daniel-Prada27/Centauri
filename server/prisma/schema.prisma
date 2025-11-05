@@ -6,33 +6,88 @@ generator client {
 datasource db {
     provider = "postgresql"
     url      = env("DATABASE_URL")
-    schemas  = ["neon_auth", "public"]
-}
-
-model users_sync {
-    raw_json   Json
-    id         String    @id @default(dbgenerated("(raw_json ->> 'id'::text)"))
-    name       String?   @default(dbgenerated("(raw_json ->> 'display_name'::text)"))
-    email      String?   @default(dbgenerated("(raw_json ->> 'primary_email'::text)"))
-    created_at DateTime? @default(dbgenerated("to_timestamp((trunc((((raw_json ->> 'signed_up_at_millis'::text))::bigint)::double precision) / (1000)::double precision))")) @db.Timestamptz(6)
-    updated_at DateTime? @db.Timestamptz(6)
-    deleted_at DateTime? @db.Timestamptz(6)
-    User       User?
-
-    @@index([deleted_at])
-    @@schema("neon_auth")
+    schemas  = ["public"]
 }
 
 model User {
+  id            String    @id
+  name          String
+  email         String @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
+
+  sessions      Session[]
+  accounts      Account[]
+  profile User_Profile?
+
+  @@map("user")
+  @@schema("public")
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+  token     String @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+  @@schema("public")
+}
+
+model Account {
+  id                    String    @id
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("account")
+  @@schema("public")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  @@map("verification")
+  @@schema("public")
+}
+
+
+model User_Profile {
     // id         String  @id @default(uuid()) @db.Uuid
-    user_id    String  @id @unique
+    user_id    String  @id
     occupation String  @db.VarChar(50)
     location   String? @db.VarChar(40)
     picture    String? @db.VarChar(200)
 
-    user_sync users_sync @relation(fields: [user_id], references: [id])
+    user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-    Teams   Team[] // Relación implícita de muchos a muchos con Team
+    // Teams   Team[] // Relación implícita de muchos a muchos con Team
+    teams Member[]
+
     Task    Task[]
     Comment Comment[]
     Event   Event[]   @relation("EventAuthor")
@@ -50,13 +105,26 @@ model Team {
     name        String @db.VarChar(50)
     description String @db.VarChar(400)
 
-    Members User[] // Relación implícita de muchos a muchos con User
+    // Members User[] // Relación implícita de muchos a muchos con User
+    users Member[]
 
     Tasks        Task[] // Relacion inversa de uno a muchos con Task
     Event        Event[]
     Notification Notification[]
     Channel      Channel[]
 
+    @@schema("public")
+}
+
+model Member {
+    id_user String
+    id_team String @db.Uuid
+    role String @db.VarChar(30)
+
+    user User_Profile @relation(fields: [id_user], references: [user_id])
+    team Team @relation(fields: [id_team], references: [id])
+
+    @@id([id_user, id_team])
     @@schema("public")
 }
 
@@ -70,8 +138,8 @@ model Task {
     type           String   @db.VarChar(30)
     due_date       DateTime @db.Date //Debe pasasrse como objeto Date() por un bug (documentacion)
 
-    team        Team @relation(fields: [id_team], references: [id])
-    responsible User @relation(fields: [id_responsible], references: [user_id])
+    team        Team @relation(fields: [id_team], references: [id], onDelete: Cascade)
+    responsible User_Profile @relation(fields: [id_responsible], references: [user_id])
 
     Subtasks Subtask[]
     Comment  Comment[]
@@ -86,7 +154,7 @@ model Subtask {
     name    String @db.VarChar(50)
     status  String @db.VarChar(20)
 
-    task Task @relation(fields: [id_task], references: [id])
+    task Task @relation(fields: [id_task], references: [id], onDelete: Cascade)
 
     @@index([id_task])
     @@schema("public")
@@ -100,8 +168,8 @@ model Comment {
     edited    Boolean
     content   String  @db.VarChar(300)
 
-    task   Task @relation(fields: [id_task], references: [id])
-    author User @relation(fields: [id_author], references: [user_id])
+    task   Task @relation(fields: [id_task], references: [id], onDelete: Cascade)
+    author User_Profile @relation(fields: [id_author], references: [user_id])
 
     @@schema("public")
 }
@@ -114,10 +182,10 @@ model Event {
     description String   @db.VarChar(400)
     due_date    DateTime @db.Date
 
-    team   Team @relation(fields: [id_team], references: [id])
-    author User @relation("EventAuthor", fields: [id_author], references: [user_id])
+    team   Team @relation(fields: [id_team], references: [id], onDelete: Cascade)
+    author User_Profile @relation("EventAuthor", fields: [id_author], references: [user_id])
 
-    Members User[]
+    Members User_Profile[]
 
     @@index([id_team])
     @@schema("public")
@@ -144,7 +212,7 @@ model NotificationMember {
     id_notification String  @db.Uuid
     read            Boolean
 
-    member       User         @relation(fields: [id_member], references: [user_id])
+    member       User_Profile         @relation(fields: [id_member], references: [user_id], onDelete: Cascade)
     notification Notification @relation(fields: [id_notification], references: [id])
 
     @@id([id_member, id_notification])
@@ -155,7 +223,7 @@ model Channel {
     id      String @id @default(uuid()) @db.Uuid
     id_team String @db.Uuid
 
-    team         Team           @relation(fields: [id_team], references: [id])
+    team         Team           @relation(fields: [id_team], references: [id], onDelete: Cascade)
     GroupMessage GroupMessage[]
 
     @@index([id_team])
@@ -169,8 +237,8 @@ model Message {
     content    String   @db.Text
     created_at DateTime @db.Timestamp(0)
 
-    author    User @relation("MessageAuthor", fields: [id_from], references: [user_id])
-    recipient User @relation(fields: [id_to], references: [user_id])
+    author    User_Profile @relation("MessageAuthor", fields: [id_from], references: [user_id])
+    recipient User_Profile @relation(fields: [id_to], references: [user_id])
 
     @@schema("public")
 }
