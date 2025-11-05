@@ -1,7 +1,7 @@
 import express from 'express';
-import { toNodeHandler } from "better-auth/node";
-import { auth } from "./lib/auth.js";
 import cors from 'cors';
+import { toNodeHandler } from "better-auth/node";
+import { auth } from "#server/lib/auth.js";
 
 const corsOptions = {
     origin: ["http://localhost:5173"],
