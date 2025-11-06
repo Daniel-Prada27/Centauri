@@ -1,32 +1,31 @@
+// components/Login.js
 import React, { useState } from "react";
 import { signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
 import { auth, googleProvider } from "../firebaseConfig";
 import { FaGoogle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import "../estilos/Login.css";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  // Iniciar sesión con Google
   const handleGoogleLogin = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-      alert("Inicio de sesión con Google exitoso ✅");
+      navigate("/dashboard");
     } catch (error) {
-      console.error("Error al iniciar sesión con Google:", error);
-      alert("Error al iniciar sesión con Google ❌");
+      alert("Error con Google ❌");
     }
   };
 
-  // Iniciar sesión con correo y contraseña
   const handleEmailLogin = async (e) => {
     e.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      alert("Inicio de sesión exitoso ✅");
+      navigate("/dashboard");
     } catch (error) {
-      console.error("Error al iniciar sesión:", error);
       alert("Correo o contraseña incorrectos ❌");
     }
   };
@@ -72,10 +71,14 @@ function Login() {
         </button>
 
         <p className="register-link">
-          ¿No tienes cuenta?{" "}
-          <a href="/Register" className="link">
-            Crear una cuenta
-          </a>
+            ¿No tienes cuenta?{" "}
+            <span 
+                onClick={() => navigate("/Register")} 
+                className="link"
+                style={{ cursor: "pointer" }}
+            >
+                Crear una cuenta
+            </span>
         </p>
       </div>
     </div>
