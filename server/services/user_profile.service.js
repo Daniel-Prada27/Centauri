@@ -23,3 +23,30 @@ export const createUserProfile = async(userProfileData) => {
     return userProfile
 
 }
+
+export const updateUserProfile = async(userProfileData) => {
+    console.log(userProfileData);
+    const exists = await prisma.user.findUnique({
+        where: {id: userProfileData.user_id}
+    })
+
+    if (!exists) {
+        const error = new Error(`User doesn't exist`);
+        error.statusCode = 404;
+        throw error
+    }
+
+    const userProfile = await prisma.user_Profile.update({
+        where: {
+            user_id : userProfileData.user_id
+        },
+        data : {
+            occupation: userProfileData.occupation || undefined,
+            location: userProfileData.location || undefined,
+            image: userProfileData.image || undefined
+        }
+    })
+
+    return userProfile
+
+}
