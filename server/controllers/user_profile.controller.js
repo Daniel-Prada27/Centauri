@@ -1,0 +1,20 @@
+import * as userProfileService from '#server/services/user_profile.service.js'
+import { UserProfileSchema } from '#server/models/schema.user_profile.js'
+import { authClient } from '#server/lib/auth-client.js'
+
+
+export const addUserProfile = async (req, res) => {
+    try {
+        console.log("here");
+
+        const userProfile = UserProfileSchema.parse(req.body)
+
+        const result = await userProfileService.createUserProfile(userProfile)
+        res.json(`User Profile created: ${result}`)
+    } catch (error) {
+        if (error.statusCode) {
+            return res.status(error.statusCode).json({ message: error.message });
+        }
+        res.status(500).json({ message: 'Something went wrong!' });
+    }
+}
