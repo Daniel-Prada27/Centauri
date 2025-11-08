@@ -9,7 +9,7 @@ export const addUserProfile = async (req, res) => {
         const userProfile = UserProfileSchema.parse(req.body)
 
         const result = await userProfileService.createUserProfile(userProfile)
-        res.json(`User Profile created: ${result}`)
+        res.json(result)
     } catch (error) {
         if (error.statusCode) {
             return res.status(error.statusCode).json({ message: error.message });
