@@ -5,4 +5,6 @@ import * as SchemaValidation from '#server/middleware/validateSchema.js'
 export const userProfileRouter = express.Router();
 
 userProfileRouter.post('/complete-profile', controller.addUserProfile);
+// Maybe change to /profile/:id ??
+userProfileRouter.get('/get-profile', controller.readUserProfile);
 userProfileRouter.put('/update-profile', SchemaValidation.validateUserProfile, controller.updateUserProfile);
