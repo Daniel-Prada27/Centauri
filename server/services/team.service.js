@@ -62,3 +62,29 @@ export const readTeam = async(userId) => {
 
     return teams
 }
+
+export const updateTeam = async(teamId, teamData) => {
+    console.log(teamData);
+    const exists = await prisma.team.findUnique({
+        where: {id: teamId}
+    })
+
+    if (!exists) {
+        const error = new Error(`Team doesn't exist`);
+        error.statusCode = 404;
+        throw error
+    }
+
+    const team = await prisma.team.update({
+        where: {
+            id : teamId
+        },
+        data : {
+            name: teamData.name || undefined,
+            description: teamData.description || undefined
+        }
+    })
+
+    return team
+
+}
