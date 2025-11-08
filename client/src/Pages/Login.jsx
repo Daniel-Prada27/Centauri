@@ -24,7 +24,7 @@ function Login() {
             }
 
             console.log("Inicio de sesión con Google exitoso:", data);
-            navigate("/dashboard");
+            navigate("/teamspage");
         } catch (err) {
             console.error("Error al iniciar sesión con Google:", err);
             alert("Error con Google ❌");
