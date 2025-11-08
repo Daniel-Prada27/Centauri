@@ -1,25 +1,42 @@
-import {PrismaClient} from '#server/generated/prisma/client.ts'
+import { PrismaClient } from '#server/generated/prisma/client.ts'
 import dotenv from 'dotenv'
 
-dotenv.config({path: '../.env'})
+dotenv.config({ path: '../.env' })
 
 
 const prisma = new PrismaClient()
 
-export const createTeam = async(teamData) => {
+export const createTeam = async (userId, teamData) => {
     console.log(teamData);
-    const exists = await prisma.team.findUnique({
-        where: {id: teamData.user_id}
+    const teams = await prisma.team.findMany({
+        where: {
+            name: teamData.name,
+            users: {
+                some: {
+                    id_user: userId,
+                    role: "owner"
+                }
+
+            }
+        }
     })
 
-    if (!exists) {
-        const error = new Error(`User doesn't exist`);
+
+    if (teams.length !== 0) {
+        const error = new Error(`You already own a team with that name`);
         error.statusCode = 404;
         throw error
     }
 
-    const userProfile = await prisma.user_Profile.create({data: teamData})
+    const team = await prisma.team.create({ data: teamData })
+    const owner_member = await prisma.member.create({
+        data: {
+            id_user: userId,
+            id_team: team.id,
+            role: "owner"
+        }
+    })
 
-    return userProfile
+    return team
 
 }
