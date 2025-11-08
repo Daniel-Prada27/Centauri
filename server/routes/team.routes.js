@@ -13,3 +13,7 @@ teamRouter.post('/create-team',
 teamRouter.get('/get-teams',
     ValidateSession.validateSession,
     controller.readTeam);
+
+teamRouter.put('/:teamId',
+    ValidateSession.validateSession,
+    controller.updateTeam);
