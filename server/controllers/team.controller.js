@@ -19,3 +19,16 @@ export const createTeam = async (req, res) => {
         res.status(500).json({ message: 'Something went wrong!' });
     }
 }
+
+export const readTeam = async (req, res) => {
+    try {
+        const userId = req.session.user.id
+        const result = await teamService.readTeam(userId)
+        res.status(200).json(result)
+    } catch (error) {
+        if (error.statusCode) {
+            return res.status(error.statusCode).json({ message: error.message });
+        }
+        res.status(500).json({ message: 'Something went wrong!' });
+    }
+}
