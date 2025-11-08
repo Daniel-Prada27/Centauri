@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { createUserWithEmailAndPassword, updateProfile, signInWithPopup } from "firebase/auth";
-import { auth, googleProvider } from "../firebaseConfig";
 import { FaGoogle } from "react-icons/fa";
-import "../estilos/Login.css"; // Reutilizamos el mismo estilo
+import "../estilos/Login.css";
+// import the authClient for Better Auth
+import { authClient } from "../../../server/lib/auth-client.js";
 
 function Register() {
   const [name, setName] = useState("");
@@ -13,22 +13,41 @@ function Register() {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(userCredential.user, { displayName: name });
-      alert("Cuenta creada exitosamente ✅");
-    } catch (error) {
-      console.error("Error al registrar:", error);
+      const { data, error } = await authClient.signUp.email({
+        email,
+        password,
+        name,
+        // optionally image, callbackURL etc.
+      });
+      if (error) {
+        console.error("Error al registrar:", error);
+        alert("Error al crear la cuenta ❌: " + error.message);
+      } else {
+        alert("Cuenta creada exitosamente ✅");
+        // you may redirect, or clear form, etc.
+      }
+    } catch (err) {
+      console.error("Error al registrar:", err);
       alert("Error al crear la cuenta ❌");
     }
   };
 
-  // Registrar con Google
+  // Registrar con Google (social)
   const handleGoogleRegister = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
-      alert("Registro con Google exitoso ✅");
-    } catch (error) {
-      console.error("Error al registrarse con Google:", error);
+      const { data, error } = await authClient.signIn.social({
+        provider: "google",
+        // callbackURL: "/dashboard"  // optional
+      });
+      if (error) {
+        console.error("Error al registrarse con Google:", error);
+        alert("Error al registrarse con Google ❌: " + error.message);
+      } else {
+        alert("Registro con Google exitoso ✅");
+        // redirect or whatever
+      }
+    } catch (err) {
+      console.error("Error al registrarse con Google:", err);
       alert("Error al registrarse con Google ❌");
     }
   };
