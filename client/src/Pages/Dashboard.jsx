@@ -108,7 +108,7 @@ export default function Dashboard() {
         const confirmDelete = window.confirm("¿Seguro que deseas eliminar este equipo?");
         if (!confirmDelete) return;
 
-        await makeRequest(`/team/delete-team/${teamId}`, "DELETE");
+        await makeRequest(`/team/delete-team/${editingTeam.id}`, "DELETE");
         setTeams(teams.filter((t) => t.id !== teamId));
     };
 
@@ -124,7 +124,7 @@ export default function Dashboard() {
     // -----------------------------
     const handleUpdateTeam = async (e) => {
         e.preventDefault();
-        await makeRequest("/team/update-team", "PUT", editingTeam, { "X-Team-Id": editingTeam.id });
+        await makeRequest(`/team/${editingTeam.id}`, "PUT", editingTeam);
 
         // Actualizar lista local
         setTeams(
