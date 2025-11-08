@@ -9,7 +9,7 @@ export const addUserProfile = async (req, res) => {
         const userProfile = UserProfileSchema.parse(req.body)
 
         const result = await userProfileService.createUserProfile(userProfile)
-        res.json(result)
+        res.status(201).json(result)
     } catch (error) {
         if (error.statusCode) {
             return res.status(error.statusCode).json({ message: error.message });
@@ -21,7 +21,7 @@ export const addUserProfile = async (req, res) => {
 export const readUserProfile = async (req, res) => {
     try {
         const result = await userProfileService.readUserProfile(req.body)
-        res.json(result)
+        res.status(200).json(result)
     } catch (error) {
         if (error.statusCode) {
             return res.status(error.statusCode).json({ message: error.message });
@@ -35,7 +35,7 @@ export const updateUserProfile = async (req, res) => {
         const userProfile = req.body
 
         const result = await userProfileService.updateUserProfile(userProfile)
-        res.json(result)
+        res.status(201).json(result)
     } catch (error) {
         if (error.statusCode) {
             return res.status(error.statusCode).json({ message: error.message });
@@ -47,7 +47,7 @@ export const updateUserProfile = async (req, res) => {
 export const deleteUserProfile = async (req, res) => {
     try {
         const result = await userProfileService.deleteUserProfile(req.body)
-        res.json(result)
+        res.status(200).json(result)
     } catch (error) {
         if (error.statusCode) {
             return res.status(error.statusCode).json({ message: error.message });
