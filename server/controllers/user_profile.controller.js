@@ -18,6 +18,18 @@ export const addUserProfile = async (req, res) => {
     }
 }
 
+export const readUserProfile = async (req, res) => {
+    try {
+        const result = await userProfileService.readUserProfile(req.body)
+        res.json(result)
+    } catch (error) {
+        if (error.statusCode) {
+            return res.status(error.statusCode).json({ message: error.message });
+        }
+        res.status(500).json({ message: 'Something went wrong!' });
+    }
+}
+
 export const updateUserProfile = async (req, res) => {
     try {
         const userProfile = req.body
