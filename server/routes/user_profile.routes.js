@@ -8,3 +8,4 @@ userProfileRouter.post('/complete-profile', controller.addUserProfile);
 // Maybe change to /profile/:id ??
 userProfileRouter.get('/get-profile', controller.readUserProfile);
 userProfileRouter.put('/update-profile', SchemaValidation.validateUserProfile, controller.updateUserProfile);
+userProfileRouter.delete('/delete-profile', controller.deleteUserProfile);

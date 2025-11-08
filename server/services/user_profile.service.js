@@ -79,3 +79,23 @@ export const updateUserProfile = async(userProfileData) => {
     return userProfile
 
 }
+
+export const deleteUserProfile = async(userProfileData) => {
+    const exists = await prisma.user.findUnique({
+        where: {id: userProfileData.user_id}
+    })
+
+    if (!exists) {
+        const error = new Error(`User doesn't exist`);
+        error.statusCode = 404;
+        throw error
+    }
+
+    const userProfile = await prisma.user.delete({
+        where: {
+            id: userProfileData.user_id
+        }
+    })
+
+    return userProfile
+}

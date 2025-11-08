@@ -43,3 +43,15 @@ export const updateUserProfile = async (req, res) => {
         res.status(500).json({ message: 'Something went wrong!' });
     }
 }
+
+export const deleteUserProfile = async (req, res) => {
+    try {
+        const result = await userProfileService.deleteUserProfile(req.body)
+        res.json(result)
+    } catch (error) {
+        if (error.statusCode) {
+            return res.status(error.statusCode).json({ message: error.message });
+        }
+        res.status(500).json({ message: 'Something went wrong!' });
+    }
+}
