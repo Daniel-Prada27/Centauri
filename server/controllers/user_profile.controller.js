@@ -7,8 +7,9 @@ export const addUserProfile = async (req, res) => {
     try {
 
         const userProfile = UserProfileSchema.parse(req.body)
+        const userId = req.session.user.id
 
-        const result = await userProfileService.createUserProfile(userProfile)
+        const result = await userProfileService.createUserProfile(userId, userProfile)
         res.status(201).json(result)
     } catch (error) {
         if (error.statusCode) {
@@ -20,7 +21,8 @@ export const addUserProfile = async (req, res) => {
 
 export const readUserProfile = async (req, res) => {
     try {
-        const result = await userProfileService.readUserProfile(req.body)
+        const userId = req.session.user.id
+        const result = await userProfileService.readUserProfile(userId)
         res.status(200).json(result)
     } catch (error) {
         if (error.statusCode) {
@@ -33,8 +35,9 @@ export const readUserProfile = async (req, res) => {
 export const updateUserProfile = async (req, res) => {
     try {
         const userProfile = req.body
+        const userId = req.session.user.id
 
-        const result = await userProfileService.updateUserProfile(userProfile)
+        const result = await userProfileService.updateUserProfile(userId, userProfile)
         res.status(201).json(result)
     } catch (error) {
         if (error.statusCode) {
@@ -46,7 +49,8 @@ export const updateUserProfile = async (req, res) => {
 
 export const deleteUserProfile = async (req, res) => {
     try {
-        const result = await userProfileService.deleteUserProfile(req.body)
+        const userId = req.session.user.id
+        const result = await userProfileService.deleteUserProfile(userId)
         res.status(200).json(result)
     } catch (error) {
         if (error.statusCode) {

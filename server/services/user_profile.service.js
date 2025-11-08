@@ -6,10 +6,10 @@ dotenv.config({path: '../.env'})
 
 const prisma = new PrismaClient()
 
-export const createUserProfile = async(userProfileData) => {
+export const createUserProfile = async(userId, userProfileData) => {
     console.log(userProfileData);
     const exists = await prisma.user.findUnique({
-        where: {id: userProfileData.user_id}
+        where: {id: userId}
     })
 
     if (!exists) {
@@ -24,9 +24,9 @@ export const createUserProfile = async(userProfileData) => {
 
 }
 
-export const readUserProfile = async(userProfileData) => {
+export const readUserProfile = async(userId) => {
     const exists = await prisma.user.findUnique({
-        where: {id: userProfileData.user_id}
+        where: {id: userId}
     })
 
     if (!exists) {
@@ -37,7 +37,7 @@ export const readUserProfile = async(userProfileData) => {
 
     const userProfile = await prisma.user_Profile.findUnique({
         where: {
-            user_id: userProfileData.user_id
+            user_id: userId
         },
         include: {
             user: {
@@ -53,10 +53,10 @@ export const readUserProfile = async(userProfileData) => {
     return userProfile
 }
 
-export const updateUserProfile = async(userProfileData) => {
+export const updateUserProfile = async(userId, userProfileData) => {
     console.log(userProfileData);
     const exists = await prisma.user.findUnique({
-        where: {id: userProfileData.user_id}
+        where: {id: userId}
     })
 
     if (!exists) {
@@ -67,12 +67,12 @@ export const updateUserProfile = async(userProfileData) => {
 
     const userProfile = await prisma.user_Profile.update({
         where: {
-            user_id : userProfileData.user_id
+            user_id : userId
         },
         data : {
             occupation: userProfileData.occupation || undefined,
             location: userProfileData.location || undefined,
-            image: userProfileData.image || undefined
+            picture: userProfileData.picture || undefined
         }
     })
 
@@ -80,9 +80,9 @@ export const updateUserProfile = async(userProfileData) => {
 
 }
 
-export const deleteUserProfile = async(userProfileData) => {
+export const deleteUserProfile = async(userId) => {
     const exists = await prisma.user.findUnique({
-        where: {id: userProfileData.user_id}
+        where: {id: userId}
     })
 
     if (!exists) {
@@ -93,7 +93,7 @@ export const deleteUserProfile = async(userProfileData) => {
 
     const userProfile = await prisma.user.delete({
         where: {
-            id: userProfileData.user_id
+            id: userId
         }
     })
 
