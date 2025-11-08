@@ -95,6 +95,11 @@ export default function Dashboard() {
         }
     };
 
+    const handleGetTeams = async (e) => {
+        e.preventDefault();
+        await makeRequest("/team/get-teams", "GET");
+    }
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto space-y-10">
@@ -136,6 +141,15 @@ export default function Dashboard() {
                         Crear equipo
                     </button>
                 </form>
+                {/* BOTÓN DE SIGN OUT */}
+                <div className="text-center pt-6">
+                    <button
+                        onClick={handleGetTeams}
+                        className="bg-red-500 hover:bg-red-600 text-white font-medium px-6 py-3 rounded-lg transition-colors"
+                    >
+                        Get teams
+                    </button>
+                </div>
 
                 {/* FORMULARIO: ACTUALIZAR PERFIL */}
                 <form
