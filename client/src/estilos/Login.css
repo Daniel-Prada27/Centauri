@@ -56,6 +56,7 @@
   background-color: #fafbfc;
   transition: all 0.2s ease;
   box-sizing: border-box;
+  color: black;
 }
 
 .form-group input:focus {
