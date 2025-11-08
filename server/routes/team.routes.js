@@ -9,3 +9,7 @@ teamRouter.post('/create-team',
     ValidateSession.validateSession,
     SchemaValidation.validateTeam,
     controller.createTeam);
+
+teamRouter.get('/get-teams',
+    ValidateSession.validateSession,
+    controller.readTeam);
