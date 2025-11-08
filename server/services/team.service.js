@@ -40,3 +40,25 @@ export const createTeam = async (userId, teamData) => {
     return team
 
 }
+
+export const readTeam = async(userId) => {
+    const teams = await prisma.team.findMany({
+        where: {
+            users: {
+                some: {
+                    id_user: userId,
+                    role: "owner"
+                }
+            }
+        }
+    })
+
+    if (teams.length === 0) {
+        const error = new Error(`You dont have any teams`);
+        error.statusCode = 404;
+        throw error
+    }
+
+
+    return teams
+}
