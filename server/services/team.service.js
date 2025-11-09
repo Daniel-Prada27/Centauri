@@ -41,7 +41,7 @@ export const createTeam = async (userId, teamData) => {
 
 }
 
-export const readTeam = async(userId) => {
+export const readTeam = async (userId) => {
     const teams = await prisma.team.findMany({
         where: {
             users: {
@@ -63,10 +63,10 @@ export const readTeam = async(userId) => {
     return teams
 }
 
-export const updateTeam = async(teamId, teamData) => {
+export const updateTeam = async (teamId, teamData) => {
     console.log(teamData);
     const exists = await prisma.team.findUnique({
-        where: {id: teamId}
+        where: { id: teamId }
     })
 
     if (!exists) {
@@ -77,9 +77,9 @@ export const updateTeam = async(teamId, teamData) => {
 
     const team = await prisma.team.update({
         where: {
-            id : teamId
+            id: teamId
         },
-        data : {
+        data: {
             name: teamData.name || undefined,
             description: teamData.description || undefined
         }
@@ -87,4 +87,34 @@ export const updateTeam = async(teamId, teamData) => {
 
     return team
 
+}
+
+export const deleteTeam = async (userId, teamId) => {
+    const exists = await prisma.team.findUnique({
+        where: { id: teamId }
+    })
+
+    if (!exists) {
+        const error = new Error(`Team doesn't exist`);
+        error.statusCode = 404;
+        throw error
+    }
+
+    await prisma.member.delete({
+        where: {
+            id_user_id_team: {
+                id_team: teamId,
+                id_user: userId
+            }
+
+        }
+    })
+
+    const team = await prisma.team.delete({
+        where: {
+            id: teamId
+        }
+    })
+
+    return team
 }
