@@ -108,8 +108,6 @@ export const deleteUserNotification = async (userId, notificationId) => {
         throw error
     }
 
-    console.log(notification);
-    console.log(userId);
 
     const notificationMember = await prisma.notificationMember.findUnique({
         where: {
@@ -136,4 +134,46 @@ export const deleteUserNotification = async (userId, notificationId) => {
     })
 
     return deletedNotification
+}
+
+export const markUserRead = async (userId, notificationId) => {
+
+    await checkUserExistence(userId);
+    const notification = await checkNotificationExistence(notificationId)
+
+    if (!notification) {
+        const error = new Error(`Notification doesn't exist`);
+        error.statusCode = 404;
+        throw error
+    }
+
+
+    const notificationMember = await prisma.notificationMember.findUnique({
+        where: {
+            id_member_id_notification: {
+                id_member: userId,
+                id_notification: notification.id
+            }
+        }
+    })
+
+    if (!notificationMember) {
+        const error = new Error(`Can't mark another member's notification as read`);
+        error.statusCode = 401;
+        throw error
+    }
+
+    const updatedNotification = await prisma.notificationMember.update({
+        where: {
+            id_member_id_notification: {
+                id_notification: notification.id,
+                id_member: userId
+            }
+        },
+            data: {
+                read: true
+            }
+    })
+
+    return updatedNotification
 }
