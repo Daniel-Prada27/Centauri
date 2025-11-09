@@ -108,7 +108,7 @@ export default function Dashboard() {
         const confirmDelete = window.confirm("¿Seguro que deseas eliminar este equipo?");
         if (!confirmDelete) return;
 
-        await makeRequest(`/team/delete-team/${editingTeam.id}`, "DELETE");
+        await makeRequest(`/team/${editingTeam.id}`, "DELETE");
         setTeams(teams.filter((t) => t.id !== teamId));
     };
 
