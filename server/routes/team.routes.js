@@ -5,7 +5,7 @@ import * as ValidateSession from '#server/middleware/validateSession.js'
 
 export const teamRouter = express.Router();
 
-teamRouter.post('/create-team',
+teamRouter.post('',
     ValidateSession.validateSession,
     SchemaValidation.validateTeam,
     controller.createTeam);

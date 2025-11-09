@@ -65,7 +65,7 @@ export default function Dashboard() {
     // -----------------------------
     const handleCreateTeam = async (e) => {
         e.preventDefault();
-        await makeRequest("/team/create-team", "POST", team);
+        await makeRequest("/team", "POST", team);
     };
 
     // -----------------------------
