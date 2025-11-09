@@ -35,16 +35,16 @@ const checkMemberExistence = async (teamId, userId) => {
         where: {
             id_user_id_team: {
                 id_team: teamId,
-                userId: userId
+                id_user: userId
+            },
+            role : {
+                not: "pending"
             }
         }
     })
 
-    if (!exists) {
-        const error = new Error(`Member already on the team`);
-        error.statusCode = 409;
-        throw error
-    }
+    return exists
+
 }
 
 const checkInviteExistence = async (teamId, userId) => {
@@ -75,7 +75,14 @@ export const inviteMember = async (userId, member) => {
 
     await checkTeamExistence(teamId);
     await checkUserExistence(invitedUserId);
+    const memberExists = await checkMemberExistence(teamId, invitedUserId)
     const inviteExists = await checkInviteExistence(teamId, invitedUserId);
+
+    if (memberExists) {
+        const error = new Error(`Member already on the team`);
+        error.statusCode = 409;
+        throw error
+    }
 
     if (inviteExists) {
         const error = new Error(`User already invited`);
