@@ -42,6 +42,18 @@ const isOwner = async (teamId, userId) => {
     return false
 }
 
+const checkTeamExistence = async (teamId) => {
+    const exists = await prisma.team.findUnique({
+        where: { id: teamId }
+    })
+
+    if (!exists) {
+        const error = new Error(`Team doesn't exist`);
+        error.statusCode = 404;
+        throw error
+    }
+}
+
 const isResponsibleValid = async (teamId, userId) => {
     const exists = await prisma.member.findUnique({
         where: {
@@ -101,4 +113,16 @@ export const createTask = async (userId, task) => {
 
     return createdTask
 
+}
+
+export const readTasks = async (teamId) => {
+    await checkTeamExistence(teamId)
+
+    const members = await prisma.task.findMany({
+        where: {
+            id_team: teamId
+        }
+    })
+
+    return members
 }

@@ -19,3 +19,16 @@ export const createTask = async (req, res) => {
         res.status(500).json({ message: 'Something went wrong!' });
     }
 }
+
+export const readTasks = async (req, res) => {
+    try {
+        const teamId = req.params.teamId
+        const result = await taskService.readTasks(teamId)
+        res.status(200).json(result)
+    } catch (error) {
+        if (error.statusCode) {
+            return res.status(error.statusCode).json({ message: error.message });
+        }
+        res.status(500).json({ message: 'Something went wrong!' });
+    }
+}

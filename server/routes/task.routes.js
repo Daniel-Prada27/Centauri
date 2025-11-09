@@ -9,3 +9,8 @@ taskRouter.post('',
     ValidateSession.validateSession,
     SchemaValidation.validateTaskCreation,
     controller.createTask);
+
+taskRouter.get('/:teamId',
+    ValidateSession.validateSession,
+    controller.readTasks
+);
