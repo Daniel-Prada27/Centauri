@@ -1,4 +1,5 @@
 import { PrismaClient } from '#server/generated/prisma/client.ts'
+import { createNotification, createTeamNotification } from '#server/services/notification.service.js'
 import dotenv from 'dotenv'
 
 dotenv.config({ path: '../.env' })
@@ -85,6 +86,24 @@ const isResponsibleValid = async (teamId, userId) => {
 
 }
 
+const getAssignedTaskNotification = (teamId, taskName) => {
+
+    let currentDate = new Date();
+    // currentDate = currentDate.toISOString().split('T')[0]
+
+    const notification = {
+        id_team: teamId,
+        type: "Task",
+        title: "New task assigned to you",
+        message: `The task ${taskName} has been assigned to you`,
+        creation_date: currentDate,
+        read: false
+    }
+
+    return notification
+
+}
+
 export const createTask = async (userId, task) => {
     console.log(task);
 
@@ -120,6 +139,10 @@ export const createTask = async (userId, task) => {
     const createdTask = await prisma.task.create({ data: task })
     createdTask.due_date = createdTask.due_date.toISOString().split('T')[0]
     console.log(createdTask);
+
+    const notification = getAssignedTaskNotification(createdTask.id_team, createdTask.name)
+
+    await createNotification(notification, [createdTask.id_responsible]);
 
     return createdTask
 
@@ -188,9 +211,11 @@ export const updateTask = async (userId, taskId, task) => {
     updatedTask.due_date = updatedTask.due_date.toISOString().split('T')[0]
     console.log(updatedTask);
 
+    const notification = getAssignedTaskNotification(updatedTask.id_team, updatedTask.name)
+
+    await createNotification(notification, [updatedTask.id_responsible]);
+
     return updatedTask
-
-
 
 }
 
