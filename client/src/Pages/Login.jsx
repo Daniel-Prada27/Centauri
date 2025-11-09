@@ -42,7 +42,7 @@ function Login() {
                 {
                     onSuccess: (ctx) => {
                         console.log("Inicio de sesión exitoso:", ctx);
-                        navigate("/dashboard");
+                        navigate("/teamspage");
                     },
                     onError: (ctx) => {
                         console.error("Error al iniciar sesión:", ctx.error);

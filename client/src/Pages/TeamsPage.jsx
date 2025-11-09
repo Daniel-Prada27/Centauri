@@ -12,8 +12,9 @@ function TeamsPage() {
   const handleCreateTeam = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:5000/api/teams", {
+      const res = await fetch("http://localhost:3000/teams/create-team", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: teamName, description: teamDescription }),
       });

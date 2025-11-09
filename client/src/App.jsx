@@ -20,13 +20,14 @@ function App() {
         <Route element={<PublicRoute />}>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/teamspage" element={<TeamsPage />} />
+          <Route path="/boardpage" element={<BoardPage />} />
         </Route>
 
         {/* Rutas privadas: solo accesibles si SÍ estás logueado */}
         <Route element={<PrivateRoute />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/teamspage" element={<TeamsPage />} />
-          <Route path="/boardpage" element={<BoardPage />} />
+
         </Route>
 
         {/* Redirección en caso de ruta no existente */}
