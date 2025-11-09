@@ -18,6 +18,61 @@ const checkTeamExistence = async (teamId) => {
     }
 }
 
+const checkUserExistence = async (userId) => {
+    const exists = await prisma.user.findUnique({
+        where: { id: userId }
+    })
+
+    if (!exists) {
+        const error = new Error(`User doesn't exist`);
+        error.statusCode = 404;
+        throw error
+    }
+}
+
+export const inviteMember = async (userId, member) => {
+
+    const teamId = member.id_team
+    const invitedUserId = member.id_user
+
+    if (invitedUserId == userId) {
+        const error = new Error(`Cant invite yourself to a team`);
+        error.statusCode = 400;
+        throw error
+    }
+
+    checkTeamExistence(teamId);
+    checkUserExistence(invitedUserId);
+
+    const owner = await prisma.member.findUnique({
+        where: {
+            id_user_id_team: {
+                id_team: teamId,
+                id_user: userId
+            },
+            role: "owner"
+
+        }
+    })
+
+    if (!owner) {
+        const error = new Error(`Only the team owner can invite other users`);
+        error.statusCode = 401;
+        throw error
+    }
+
+    const invitedMember = await prisma.member.create({
+        data: {
+            id_team: teamId,
+            id_user: invitedUserId,
+            role: "pending"
+        }
+    })
+
+    return invitedMember
+
+}
+
 export const readAllMembers = async (teamId) => {
 
     const exists = checkTeamExistence(teamId)
