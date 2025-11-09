@@ -20,3 +20,8 @@ taskRouter.put('/:taskId',
     SchemaValidation.validateTask,
     controller.updateTask
 );
+
+taskRouter.delete('/:taskId',
+    ValidateSession.validateSession,
+    controller.deleteTask
+);

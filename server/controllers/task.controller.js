@@ -50,3 +50,18 @@ export const updateTask = async (req, res) => {
         res.status(500).json({ message: 'Something went wrong!' });
     }
 }
+
+export const deleteTask = async (req, res) => {
+    try {
+        const taskId = req.params.taskId
+        const userId = req.session.user.id
+        const result = await taskService.deleteTask(userId, taskId)
+        res.status(200).json(result)
+    } catch (error) {
+        if (error.statusCode) {
+            return res.status(error.statusCode).json({ message: error.message });
+        }
+        console.log(error);
+        res.status(500).json({ message: 'Something went wrong!' });
+    }
+}

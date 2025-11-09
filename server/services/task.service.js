@@ -193,3 +193,38 @@ export const updateTask = async (userId, taskId, task) => {
 
 
 }
+
+
+export const deleteTask = async (userId, taskId) => {
+
+    const targetTask = await checkTaskExistence(taskId);
+
+    if (!targetTask) {
+        const error = new Error(`Task doesn't exist`);
+        error.statusCode = 404;
+        throw error
+    }
+
+    const userIsOwner = await isOwner(targetTask.id_team, userId);
+    const userIsLeader = await isLeader(targetTask.id_team, userId);
+
+    if (!userIsOwner && !userIsLeader) {
+        const error = new Error(`Insufficient permission to delete task`);
+        error.statusCode = 404;
+        throw error
+    }
+
+    const deletedTask = await prisma.task.delete({
+        where: {
+            id: taskId,
+        }
+    })
+
+    deletedTask.due_date = deletedTask.due_date.toISOString().split('T')[0]
+
+
+    return deletedTask
+
+
+
+}
