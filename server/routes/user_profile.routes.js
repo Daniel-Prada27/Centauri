@@ -5,7 +5,7 @@ import * as ValidateSession from '#server/middleware/validateSession.js'
 
 export const userProfileRouter = express.Router();
 
-userProfileRouter.post('/complete-profile',
+userProfileRouter.post('',
     ValidateSession.validateSession,
     SchemaValidation.validateUserProfile,
     controller.addUserProfile);

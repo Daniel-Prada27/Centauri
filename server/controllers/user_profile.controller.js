@@ -9,12 +9,21 @@ export const addUserProfile = async (req, res) => {
         const userProfile = UserProfileSchema.parse(req.body)
         const userId = req.session.user.id
 
+        console.log(userProfile);
+        userProfile.user = {
+            connect: {
+                id: userId
+            }
+        }
+        console.log(userProfile);
+
         const result = await userProfileService.createUserProfile(userId, userProfile)
         res.status(201).json(result)
     } catch (error) {
         if (error.statusCode) {
             return res.status(error.statusCode).json({ message: error.message });
         }
+        console.log(error);
         res.status(500).json({ message: 'Something went wrong!' });
     }
 }
@@ -43,6 +52,7 @@ export const updateUserProfile = async (req, res) => {
         if (error.statusCode) {
             return res.status(error.statusCode).json({ message: error.message });
         }
+        console.log(error);
         res.status(500).json({ message: 'Something went wrong!' });
     }
 }
