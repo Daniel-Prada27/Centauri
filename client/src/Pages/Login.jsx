@@ -10,6 +10,58 @@ function Login() {
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
 
+    //autentificar que el usuario existe
+    const fetchUserData = async () => {
+        try {
+            const res = await fetch("http://localhost:3000/profile", {
+                method: "GET",
+                credentials: "include", // envía cookie de sesión
+                headers: { "Content-Type": "application/json" },
+            });
+
+            if (!res.ok) throw new Error("No se pudo obtener el usuario");
+            const user = await res.json();
+
+            console.log("Usuario autenticado:", user);
+
+            // Verificar si pertenece a algún equipo
+            await checkUserTeam(user.user_id);
+            
+            } catch (err) {
+            console.error("Error al obtener usuario:", err);
+            alert("Error al validar sesión ❌");
+        }
+    };
+
+    const checkUserTeam = async () => {
+    try {
+        const res = await fetch("http://localhost:3000/team", {
+        method: "GET",
+        credentials: "include", // importante: para enviar cookies o sesión
+        });
+
+        if (!res.ok) throw new Error("Error al obtener equipos del usuario");
+
+        const teams = await res.json();
+
+        // Modificar para cuando haya mas de 1 team poder elegir entre opciones
+        if (Array.isArray(teams) && teams.length > 0) {
+        console.log("Usuario pertenece a equipo:", teams[0]);
+        navigate("/boardpage");
+
+
+        } else {
+        // No pertenece a ningún equipo → redirigir a creación/unión
+        console.log("Usuario sin equipo, redirigiendo a teamspage");
+        navigate("/teamspage");
+        }
+    } catch (err) {
+        console.error("Error al comprobar equipo:", err);
+        alert("No se pudo validar si el usuario tiene equipo ❌");
+    }
+    };
+
+
     // Iniciar sesión con Google (Better Auth)
     const handleGoogleLogin = async () => {
         try {
@@ -32,36 +84,26 @@ function Login() {
     };
 
     // Iniciar sesión con correo y contraseña (Better Auth)
+
     const handleEmailLogin = async (e) => {
         e.preventDefault();
         try {
-            const { data, error } = await authClient.signIn.email({
-                email,
-                password,
+        await authClient.signIn.email(
+            { email, password },
+            {
+            onSuccess: async (ctx) => {
+                console.log("Inicio de sesión exitoso:", ctx);
+                await fetchUserData();
             },
-                {
-                    onSuccess: (ctx) => {
-                        console.log("Inicio de sesión exitoso:", ctx);
-                        navigate("/teamspage");
-                    },
-                    onError: (ctx) => {
-                        console.error("Error al iniciar sesión:", ctx.error);
-                        alert("Correo o contraseña incorrectos ❌");
-                        return;
-                    },
-                });
-
-            // if (error) {
-            //     console.error("Error al iniciar sesión:", error);
-            //     alert("Correo o contraseña incorrectos ❌");
-            //     return;
-            // }
-
-            // console.log("Inicio de sesión exitoso:", data);
-            // navigate("/dashboard");
+            onError: (ctx) => {
+                console.error("Error al iniciar sesión:", ctx.error);
+                alert("Correo o contraseña incorrectos ❌");
+            },
+            }
+        );
         } catch (err) {
-            console.error("Error al iniciar sesión:", err);
-            alert("Error al iniciar sesión ❌");
+        console.error("Error general al iniciar sesión:", err);
+        alert("Error al iniciar sesión ❌");
         }
     };
 

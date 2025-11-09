@@ -12,7 +12,7 @@ function TeamsPage() {
   const handleCreateTeam = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:3000/teams/create-team", {
+      const res = await fetch("http://localhost:3000/team", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -21,7 +21,7 @@ function TeamsPage() {
 
       if (!res.ok) throw new Error("Error al crear el equipo");
       alert("✅ Equipo creado correctamente");
-      window.location.href = `/board/${team._id}`; 
+      window.location.href = `/boardpage/${team._id}`; 
       setShowCreateModal(false);
       setTeamName("");
       setTeamDescription("");
