@@ -8,7 +8,7 @@ import {userProfileRouter} from '#server/routes/user_profile.routes.js'
 import {teamRouter} from '#server/routes/team.routes.js'
 import {memberRouter} from '#server/routes/member.routes.js'
 import {taskRouter} from '#server/routes/task.routes.js'
-
+import {notificationRouter} from '#server/routes/notification.routes.js'
 
 const corsOptions = {
     origin: ["http://localhost:5173", "http://localhost:8080"],
@@ -27,6 +27,7 @@ app.use('/profile', userProfileRouter);
 app.use('/team', teamRouter);
 app.use('/member', memberRouter);
 app.use('/task', taskRouter);
+app.use('/notification', notificationRouter);
 
 app.get('/api', (req, res) => {
     res.json({"users": ["Jaime", "Sara", "Prada"]})
