@@ -1,4 +1,6 @@
 import { PrismaClient } from '#server/generated/prisma/client.ts'
+import { createNotification, createTeamNotification } from '#server/services/notification.service.js'
+import { readUserProfile } from '#server/services/user_profile.service.js'
 import dotenv from 'dotenv'
 
 dotenv.config({ path: '../.env' })
@@ -25,15 +27,17 @@ const isOwner = async (teamId, userId) => {
 }
 
 const checkTeamExistence = async (teamId) => {
-    const exists = await prisma.team.findUnique({
+    const team = await prisma.team.findUnique({
         where: { id: teamId }
     })
 
-    if (!exists) {
+    if (!team) {
         const error = new Error(`Team doesn't exist`);
         error.statusCode = 404;
         throw error
     }
+
+    return team
 }
 
 const checkUserExistence = async (userId) => {
@@ -80,6 +84,65 @@ const checkInviteExistence = async (teamId, userId) => {
     return exists
 }
 
+const getInvitedNotification = async (team, userId) => {
+
+    const executor = await readUserProfile(userId)
+    let currentDate = new Date();
+    // currentDate = currentDate.toISOString().split('T')[0]
+
+    const notification = {
+        id_team: team.id,
+        type: "Invite",
+        title: "You've been invited to join a team",
+        message: `${executor.user.name} invited you to join ${team.name}`,
+        creation_date: currentDate,
+        read: false
+    }
+
+    return notification
+
+}
+
+const getUpdatedNotification = async (team, userId) => {
+
+    const executor = await readUserProfile(userId)
+
+    let currentDate = new Date();
+    // currentDate = currentDate.toISOString().split('T')[0]
+
+    const notification = {
+        id_team: team.id,
+        type: "Membership",
+        title: `Role in ${team.name} has changed`,
+        message: `Your role in ${team.name} has been modified by ${executor.user.name}`,
+        creation_date: currentDate,
+        read: false
+    }
+
+    return notification
+
+}
+
+const getRemovedNotification = async (team, userId) => {
+
+    const executor = await readUserProfile(userId)
+
+    let currentDate = new Date();
+    // currentDate = currentDate.toISOString().split('T')[0]
+
+    const notification = {
+        id_team: team.id,
+        type: "Membership",
+        title: `Team expulsion`,
+        message: `You have been removed from ${team.name} by ${executor.user.name}`,
+        creation_date: currentDate,
+        read: false
+    }
+
+    return notification
+
+}
+
 export const inviteMember = async (userId, member) => {
 
     const teamId = member.id_team
@@ -91,7 +154,7 @@ export const inviteMember = async (userId, member) => {
         throw error
     }
 
-    await checkTeamExistence(teamId);
+    const team = await checkTeamExistence(teamId);
     await checkUserExistence(invitedUserId);
     const memberExists = await checkMemberExistence(teamId, invitedUserId)
     const inviteExists = await checkInviteExistence(teamId, invitedUserId);
@@ -132,6 +195,10 @@ export const inviteMember = async (userId, member) => {
             role: "pending"
         }
     })
+
+    const notification = await getInvitedNotification(team, userId)
+
+    await createNotification(notification, [invitedMember.id_user]);
 
     return invitedMember
 
@@ -244,7 +311,7 @@ export const updateMember = async (userId, member) => {
         throw error
     }
 
-    await checkTeamExistence(teamId);
+    const team = await checkTeamExistence(teamId);
     const memberExists = await checkMemberExistence(teamId, targetUserId)
 
     if (!memberExists) {
@@ -253,7 +320,7 @@ export const updateMember = async (userId, member) => {
         throw error
     }
 
-    const updatedInvite = await prisma.member.update({
+    const updatedMember = await prisma.member.update({
         where: {
             id_user_id_team: {
                 id_team: teamId,
@@ -265,10 +332,11 @@ export const updateMember = async (userId, member) => {
         }
     })
 
+    const notification = await getUpdatedNotification(team, userId)
 
-    return updatedInvite
+    await createNotification(notification, [updatedMember.id_user]);
 
-
+    return updatedMember
 }
 
 export const deleteMember = async (userId, member) => {
@@ -288,7 +356,7 @@ export const deleteMember = async (userId, member) => {
         throw error
     }
 
-    await checkTeamExistence(teamId);
+    const team = await checkTeamExistence(teamId);
     const memberExists = await checkMemberExistence(teamId, targetUserId)
 
     if (!memberExists) {
@@ -306,9 +374,11 @@ export const deleteMember = async (userId, member) => {
         }
     })
 
+    const notification = await getRemovedNotification(team, userId)
+
+    await createNotification(notification, [removedMember.id_user]);
 
     return removedMember
-
 
 }
 
