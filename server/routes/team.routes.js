@@ -10,7 +10,7 @@ teamRouter.post('', // POST http://localhost:3000/team
     SchemaValidation.validateTeam,
     controller.createTeam);
 
-teamRouter.get('/get-teams', // GET http://localhost:3000/team/get-teams
+teamRouter.get('', // GET http://localhost:3000/team/get-teams
     ValidateSession.validateSession,
     controller.readTeam);
 

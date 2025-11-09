@@ -11,13 +11,13 @@ memberRouter.post('/invite',
     controller.inviteMember
 );
 
-memberRouter.post('/invite/accept',
+memberRouter.put('/invite/accept',
     ValidateSession.validateSession,
     SchemaValidation.validateMemberInvite,
     controller.acceptInvite
 );
 
-memberRouter.post('/invite/reject',
+memberRouter.delete('/invite/reject',
     ValidateSession.validateSession,
     SchemaValidation.validateMemberInvite,
     controller.rejectInvite
