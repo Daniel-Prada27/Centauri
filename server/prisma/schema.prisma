@@ -198,7 +198,7 @@ model Notification {
     title         String   @db.VarChar(50)
     message       String   @db.VarChar(300)
     creation_date DateTime @db.Date
-    read          Boolean
+    read          Boolean @default(false)
 
     team Team @relation(fields: [id_team], references: [id])
 
@@ -210,7 +210,7 @@ model Notification {
 model NotificationMember {
     id_member       String
     id_notification String  @db.Uuid
-    read            Boolean
+    read            Boolean @default(false)
 
     member       User_Profile         @relation(fields: [id_member], references: [user_id], onDelete: Cascade)
     notification Notification @relation(fields: [id_notification], references: [id])
