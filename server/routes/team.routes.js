@@ -17,3 +17,8 @@ teamRouter.get('/get-teams',
 teamRouter.put('/:teamId',
     ValidateSession.validateSession,
     controller.updateTeam);
+
+teamRouter.delete("/:teamId",
+    ValidateSession.validateSession,
+    controller.deleteTeam
+)
