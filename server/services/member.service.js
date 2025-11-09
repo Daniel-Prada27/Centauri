@@ -151,6 +151,42 @@ export const acceptInvite = async (userId, member) => {
 
 }
 
+export const rejectInvite = async (userId, member) => {
+
+    const teamId = member.id_team
+    const invitedUserId = member.id_user
+
+    if (invitedUserId !== userId) {
+        const error = new Error(`User id does not match invited user id`);
+        error.statusCode = 400;
+        throw error
+    }
+    await checkTeamExistence(teamId);
+    await checkUserExistence(invitedUserId);
+
+    const inviteExists = await checkInviteExistence(teamId, invitedUserId);
+
+    if (!inviteExists) {
+        const error = new Error(`Invite already resolved`);
+        error.statusCode = 409;
+        throw error
+    }
+
+    const updatedInvite = await prisma.member.delete({
+        where: {
+            id_user_id_team: {
+                id_team: teamId,
+                id_user: userId
+            },
+            role: "pending"
+        }
+    })
+
+
+    return updatedInvite
+
+}
+
 export const readAllMembers = async (teamId) => {
 
     await checkTeamExistence(teamId)
@@ -169,3 +205,5 @@ export const readAllMembers = async (teamId) => {
 
     return members
 }
+
+

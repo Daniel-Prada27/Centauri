@@ -35,6 +35,21 @@ export const acceptInvite = async (req, res) => {
     }
 }
 
+export const rejectInvite = async (req, res) => {
+    try {
+        const userId = req.session.user.id
+        const member = MemberInviteSchema.parse(req.body)
+
+        const result = await memberService.rejectInvite(userId, member)
+        res.status(201).json(result)
+    } catch (error) {
+        if (error.statusCode) {
+            return res.status(error.statusCode).json({ message: error.message });
+        }
+        console.log(error);
+        res.status(500).json({ message: 'Something went wrong!' });
+    }
+}
 
 export const readAllMembers = async (req, res) => {
     try {
@@ -48,3 +63,4 @@ export const readAllMembers = async (req, res) => {
         res.status(500).json({ message: 'Something went wrong!' });
     }
 }
+

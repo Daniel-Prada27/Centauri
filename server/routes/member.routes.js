@@ -17,6 +17,12 @@ memberRouter.post('/invite/accept',
     controller.acceptInvite
 );
 
+memberRouter.post('/invite/reject',
+    ValidateSession.validateSession,
+    SchemaValidation.validateMemberInvite,
+    controller.rejectInvite
+);
+
 memberRouter.get('/:teamId',
     ValidateSession.validateSession,
     controller.readAllMembers
