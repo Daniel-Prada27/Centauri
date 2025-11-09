@@ -32,3 +32,21 @@ export const readTasks = async (req, res) => {
         res.status(500).json({ message: 'Something went wrong!' });
     }
 }
+
+export const updateTask = async (req, res) => {
+    try {
+
+        const task = TaskSchema.parse(req.body)
+        const userId = req.session.user.id
+        const taskId = req.params.taskId
+
+        const result = await taskService.updateTask(userId, taskId, task)
+        res.status(201).json(result)
+    } catch (error) {
+        if (error.statusCode) {
+            return res.status(error.statusCode).json({ message: error.message });
+        }
+        console.log(error);
+        res.status(500).json({ message: 'Something went wrong!' });
+    }
+}

@@ -54,6 +54,16 @@ const checkTeamExistence = async (teamId) => {
     }
 }
 
+const checkTaskExistence = async (taskId) => {
+    const targetTask = prisma.task.findUnique({
+        where: {
+            id: taskId
+        }
+    })
+
+    return targetTask
+}
+
 const isResponsibleValid = async (teamId, userId) => {
     const exists = await prisma.member.findUnique({
         where: {
@@ -125,4 +135,61 @@ export const readTasks = async (teamId) => {
     })
 
     return members
+}
+
+export const updateTask = async (userId, taskId, task) => {
+
+    console.log(task);
+
+    const targetTask = await checkTaskExistence(taskId);
+
+    if (!targetTask) {
+        const error = new Error(`Task doesn't exist`);
+        error.statusCode = 404;
+        throw error
+    }
+
+    if (targetTask.id_responsible !== userId) {
+        const error = new Error(`Insufficient permission to modify task`);
+        error.statusCode = 401;
+        throw error
+    }
+
+    if (targetTask.id_responsible !== task.id_responsible) {
+
+        console.log("entered");
+
+        const userIsOwner = await isOwner(targetTask.id_team, userId);
+        const userIsLeader = await isLeader(targetTask.id_team, userId);
+
+        if (!userIsOwner && !userIsLeader) {
+            const error = new Error(`Insufficient permission to change task responsible`);
+            error.statusCode = 401;
+            throw error
+        }
+
+    }
+
+
+    if (!(await isResponsibleValid(task.id_team, task.id_responsible))) {
+        const error = new Error(`Assigned responsible has insufficient permissions`);
+        error.statusCode = 401;
+        throw error
+    }
+
+
+    const updatedTask = await prisma.task.update({
+        where: {
+            id: taskId,
+            name: task.name
+        },
+        data: task
+    })
+    updatedTask.due_date = updatedTask.due_date.toISOString().split('T')[0]
+    console.log(updatedTask);
+
+    return updatedTask
+
+
+
 }

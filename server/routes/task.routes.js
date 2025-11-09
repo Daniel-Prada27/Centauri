@@ -14,3 +14,9 @@ taskRouter.get('/:teamId',
     ValidateSession.validateSession,
     controller.readTasks
 );
+
+taskRouter.put('/:taskId',
+    ValidateSession.validateSession,
+    SchemaValidation.validateTask,
+    controller.updateTask
+);
