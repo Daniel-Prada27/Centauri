@@ -6,6 +6,7 @@ import { toNodeHandler } from "better-auth/node";
 import { auth } from "#server/lib/auth.js";
 import {userProfileRouter} from '#server/routes/user_profile.routes.js'
 import {teamRouter} from '#server/routes/team.routes.js'
+import {memberRouter} from '#server/routes/team.routes.js'
 
 
 const corsOptions = {
@@ -22,7 +23,8 @@ app.all('/api/auth/{*any}', toNodeHandler(auth));
 app.use(express.json())
 
 app.use('/profile', userProfileRouter);
-app.use('/team', teamRouter)
+app.use('/team', teamRouter);
+app.use('/member', memberRouter);
 
 app.get('/api', (req, res) => {
     res.json({"users": ["Jaime", "Sara", "Prada"]})
