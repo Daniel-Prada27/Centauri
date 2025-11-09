@@ -105,7 +105,8 @@ export const deleteTeam = async (userId, teamId) => {
             id_user_id_team: {
                 id_team: teamId,
                 id_user: userId
-            }
+            },
+            role: "owner"
 
         }
     })
