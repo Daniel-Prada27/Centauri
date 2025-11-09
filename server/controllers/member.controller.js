@@ -1,12 +1,12 @@
 import * as memberService from '#server/services/member.service.js'
-import { MemberSchema } from '#server/models/schema.member.js'
+import { MemberSchema, MemberInviteSchema } from '#server/models/schema.member.js'
 import { authClient } from '#server/lib/auth-client.js'
 
 
 export const inviteMember = async (req, res) => {
     try {
         const userId = req.session.user.id
-        const member = MemberSchema.parse(req.body)
+        const member = MemberInviteSchema.parse(req.body)
 
         const result = await memberService.inviteMember(userId, member)
         res.status(201).json(result)

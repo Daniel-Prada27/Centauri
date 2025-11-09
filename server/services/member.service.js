@@ -30,6 +30,42 @@ const checkUserExistence = async (userId) => {
     }
 }
 
+const checkMemberExistence = async (teamId, userId) => {
+    const exists = await prisma.member.findUnique({
+        where: {
+            id_user_id_team: {
+                id_team: teamId,
+                userId: userId
+            }
+        }
+    })
+
+    if (!exists) {
+        const error = new Error(`Member already on the team`);
+        error.statusCode = 409;
+        throw error
+    }
+}
+
+const checkInviteExistence = async (teamId, userId) => {
+
+    const exists = await prisma.member.findUnique({
+        where: {
+            id_user_id_team: {
+                id_team: teamId,
+                id_user: userId
+            },
+            role: "pending"
+        }
+    })
+
+    if (exists) {
+        const error = new Error(`User already invited`);
+        error.statusCode = 409;
+        throw error
+    }
+}
+
 export const inviteMember = async (userId, member) => {
 
     const teamId = member.id_team
@@ -41,8 +77,9 @@ export const inviteMember = async (userId, member) => {
         throw error
     }
 
-    checkTeamExistence(teamId);
-    checkUserExistence(invitedUserId);
+    await checkTeamExistence(teamId);
+    await checkUserExistence(invitedUserId);
+    await checkInviteExistence(teamId, invitedUserId);
 
     const owner = await prisma.member.findUnique({
         where: {
@@ -73,9 +110,13 @@ export const inviteMember = async (userId, member) => {
 
 }
 
+export const acceptInvite = async () => {
+
+}
+
 export const readAllMembers = async (teamId) => {
 
-    const exists = checkTeamExistence(teamId)
+    await checkTeamExistence(teamId)
 
     const members = await prisma.member.findMany({
         where: {

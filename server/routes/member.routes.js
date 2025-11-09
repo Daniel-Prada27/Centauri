@@ -7,6 +7,7 @@ export const memberRouter = express.Router();
 
 memberRouter.post('/invite',
     ValidateSession.validateSession,
+    SchemaValidation.validateMemberInvite,
     controller.inviteMember
 );
 
