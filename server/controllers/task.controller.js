@@ -1,23 +1,15 @@
-import * as userProfileService from '#server/services/user_profile.service.js'
-import { UserProfileSchema } from '#server/models/schema.user_profile.js'
+import * as taskService from '#server/services/task.service.js'
+import { TaskSchema, TaskCreationSchema } from '#server/models/schema.task.js'
 import { authClient } from '#server/lib/auth-client.js'
 
 
-export const addUserProfile = async (req, res) => {
+export const createTask = async (req, res) => {
     try {
 
-        const userProfile = UserProfileSchema.parse(req.body)
+        const task = TaskCreationSchema.parse(req.body)
         const userId = req.session.user.id
 
-        console.log(userProfile);
-        userProfile.user = {
-            connect: {
-                id: userId
-            }
-        }
-        console.log(userProfile);
-
-        const result = await userProfileService.createUserProfile(userId, userProfile)
+        const result = await taskService.createTask(userId, task)
         res.status(201).json(result)
     } catch (error) {
         if (error.statusCode) {
@@ -28,10 +20,10 @@ export const addUserProfile = async (req, res) => {
     }
 }
 
-export const readUserProfile = async (req, res) => {
+export const readTasks = async (req, res) => {
     try {
-        const userId = req.session.user.id
-        const result = await userProfileService.readUserProfile(userId)
+        const teamId = req.params.teamId
+        const result = await taskService.readTasks(teamId)
         res.status(200).json(result)
     } catch (error) {
         if (error.statusCode) {
@@ -41,12 +33,14 @@ export const readUserProfile = async (req, res) => {
     }
 }
 
-export const updateUserProfile = async (req, res) => {
+export const updateTask = async (req, res) => {
     try {
-        const userProfile = req.body
-        const userId = req.session.user.id
 
-        const result = await userProfileService.updateUserProfile(userId, userProfile)
+        const task = TaskSchema.parse(req.body)
+        const userId = req.session.user.id
+        const taskId = req.params.taskId
+
+        const result = await taskService.updateTask(userId, taskId, task)
         res.status(201).json(result)
     } catch (error) {
         if (error.statusCode) {
@@ -57,15 +51,17 @@ export const updateUserProfile = async (req, res) => {
     }
 }
 
-export const deleteUserProfile = async (req, res) => {
+export const deleteTask = async (req, res) => {
     try {
+        const taskId = req.params.taskId
         const userId = req.session.user.id
-        const result = await userProfileService.deleteUserProfile(userId)
+        const result = await taskService.deleteTask(userId, taskId)
         res.status(200).json(result)
     } catch (error) {
         if (error.statusCode) {
             return res.status(error.statusCode).json({ message: error.message });
         }
+        console.log(error);
         res.status(500).json({ message: 'Something went wrong!' });
     }
 }

@@ -5,17 +5,17 @@ import * as ValidateSession from '#server/middleware/validateSession.js'
 
 export const userProfileRouter = express.Router();
 
-userProfileRouter.post('/complete-profile',
+userProfileRouter.post('',
     ValidateSession.validateSession,
     SchemaValidation.validateUserProfile,
     controller.addUserProfile);
 
 // Maybe change to /profile/:id ??
-userProfileRouter.get('/get-profile',
+userProfileRouter.get('',
     ValidateSession.validateSession,
     controller.readUserProfile);
 
-userProfileRouter.put('/update-profile',
+userProfileRouter.put('',
     ValidateSession.validateSession,
     SchemaValidation.validateUserProfile,
     controller.updateUserProfile);

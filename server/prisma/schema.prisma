@@ -133,7 +133,7 @@ model Task {
     id_team        String   @db.Uuid
     id_responsible String
     name           String   @db.VarChar(50)
-    status         String   @db.VarChar(20)
+    status         String   @db.VarChar(20) @default("pending")
     priority       String   @db.VarChar(20)
     type           String   @db.VarChar(30)
     due_date       DateTime @db.Date //Debe pasasrse como objeto Date() por un bug (documentacion)
@@ -198,7 +198,7 @@ model Notification {
     title         String   @db.VarChar(50)
     message       String   @db.VarChar(300)
     creation_date DateTime @db.Date
-    read          Boolean
+    read          Boolean @default(false)
 
     team Team @relation(fields: [id_team], references: [id])
 
@@ -210,10 +210,10 @@ model Notification {
 model NotificationMember {
     id_member       String
     id_notification String  @db.Uuid
-    read            Boolean
+    read            Boolean @default(false)
 
     member       User_Profile         @relation(fields: [id_member], references: [user_id], onDelete: Cascade)
-    notification Notification @relation(fields: [id_notification], references: [id])
+    notification Notification @relation(fields: [id_notification], references: [id], onDelete: Cascade)
 
     @@id([id_member, id_notification])
     @@schema("public")

@@ -32,3 +32,34 @@ export const readTeam = async (req, res) => {
         res.status(500).json({ message: 'Something went wrong!' });
     }
 }
+
+export const updateTeam = async (req, res) => {
+    try {
+        const team = TeamSchema.parse(req.body)
+        const teamId = req.params.teamId
+
+        const result = await teamService.updateTeam(teamId, team)
+        res.status(201).json(result)
+    } catch (error) {
+        if (error.statusCode) {
+            return res.status(error.statusCode).json({ message: error.message });
+        }
+        console.log(error);
+        res.status(500).json({ message: 'Something went wrong!' });
+    }
+}
+
+export const deleteTeam = async (req, res) => {
+    try {
+        const teamId = req.params.teamId
+        const userId = req.session.user.id
+        const result = await teamService.deleteTeam(userId, teamId)
+        res.status(200).json(result)
+    } catch (error) {
+        if (error.statusCode) {
+            return res.status(error.statusCode).json({ message: error.message });
+        }
+        console.log(error);
+        res.status(500).json({ message: 'Something went wrong!' });
+    }
+}

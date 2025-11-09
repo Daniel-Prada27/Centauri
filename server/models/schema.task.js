@@ -9,3 +9,12 @@ export const TaskSchema = z.object({
   type: z.string().max(30),
   due_date: z.coerce.date(),
 });
+
+export const TaskCreationSchema = z.object({
+  id_team: z.string(),
+  id_responsible: z.string(),
+  name: z.string().min(3).max(50),
+  priority: z.enum(["low", "medium", "high"]).or(z.string().max(20)),
+  type: z.string().max(30),
+  due_date: z.coerce.date(),
+});

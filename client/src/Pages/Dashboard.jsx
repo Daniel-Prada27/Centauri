@@ -20,10 +20,15 @@ export default function Dashboard() {
         picture: "",
     });
 
+    const [teams, setTeams] = useState([]);
+
+    // Para manejar el equipo en edición
+    const [editingTeam, setEditingTeam] = useState(null);
+
     // -----------------------------
     // Función genérica para requests
     // -----------------------------
-    const makeRequest = async (endpoint, method, body) => {
+    const makeRequest = async (endpoint, method, body, customHeaders = {}) => {
         setLoading(true);
         setError(null);
         setMessage(null);
@@ -31,9 +36,12 @@ export default function Dashboard() {
         try {
             const response = await fetch(`http://localhost:3000${endpoint}`, {
                 method,
-                credentials: "include", // Incluye cookies
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body),
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...customHeaders,
+                },
+                body: body ? JSON.stringify(body) : undefined,
             });
 
             if (!response.ok) {
@@ -44,6 +52,7 @@ export default function Dashboard() {
             const data = await response.json();
             setMessage(data.message || "Operación exitosa");
             console.log(data);
+            return data;
         } catch (err) {
             setError(err.message);
         } finally {
@@ -56,7 +65,7 @@ export default function Dashboard() {
     // -----------------------------
     const handleCreateTeam = async (e) => {
         e.preventDefault();
-        await makeRequest("/team/create-team", "POST", team);
+        await makeRequest("/team", "POST", team);
     };
 
     // -----------------------------
@@ -64,8 +73,7 @@ export default function Dashboard() {
     // -----------------------------
     const handleUpdateProfile = async (e) => {
         e.preventDefault();
-        await makeRequest("/profile/update-profile", "PUT", profile);
-        // await makeRequest("/aaa", "GET")
+        await makeRequest("/profile", "PUT", profile);
     };
 
     // -----------------------------
@@ -76,16 +84,11 @@ export default function Dashboard() {
             await authClient.signOut({
                 fetchOptions: {
                     onSuccess: () => {
-                        navigate("/login"); // Redirige al login tras sign out
+                        navigate("/login");
                     },
                     onError: (ctx) => {
-                        if (ctx.error.code == "FAILED_TO_GET_SESSION") {
-                            navigate("/login");
-                        } else {
-                            console.log(ctx.error);
-                            navigate("/login"); // Redirige al login si fall el sign out
-                        }
-
+                        console.log(ctx.error);
+                        navigate("/login");
                     },
                 },
             });
@@ -97,13 +100,43 @@ export default function Dashboard() {
 
     const handleGetTeams = async (e) => {
         e.preventDefault();
-        await makeRequest("/team/get-teams", "GET");
-    }
+        const data = await makeRequest("/team", "GET");
+        setTeams(data || []);
+    };
+
+    const handleDeleteTeam = async (teamId) => {
+        const confirmDelete = window.confirm("¿Seguro que deseas eliminar este equipo?");
+        if (!confirmDelete) return;
+
+        await makeRequest(`/team/${editingTeam.id}`, "DELETE");
+        setTeams(teams.filter((t) => t.id !== teamId));
+    };
+
+    // -----------------------------
+    // Mostrar formulario de actualización
+    // -----------------------------
+    const handleEditTeam = (team) => {
+        setEditingTeam(team); // Muestra el formulario con datos del equipo
+    };
+
+    // -----------------------------
+    // Enviar actualización de equipo
+    // -----------------------------
+    const handleUpdateTeam = async (e) => {
+        e.preventDefault();
+        await makeRequest(`/team/${editingTeam.id}`, "PUT", editingTeam);
+
+        // Actualizar lista local
+        setTeams(
+            teams.map((t) => (t.id === editingTeam.id ? editingTeam : t))
+        );
+
+        setEditingTeam(null);
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto space-y-10">
-
                 <h1 className="text-3xl font-bold text-center text-slate-800 mb-8">
                     Dashboard
                 </h1>
@@ -116,7 +149,6 @@ export default function Dashboard() {
                     <h2 className="text-xl font-semibold text-slate-700">
                         Crear Equipo
                     </h2>
-
                     <input
                         type="text"
                         name="name"
@@ -141,11 +173,12 @@ export default function Dashboard() {
                         Crear equipo
                     </button>
                 </form>
-                {/* BOTÓN DE SIGN OUT */}
+
+                {/* BOTÓN: OBTENER EQUIPOS */}
                 <div className="text-center pt-6">
                     <button
                         onClick={handleGetTeams}
-                        className="bg-red-500 hover:bg-red-600 text-white font-medium px-6 py-3 rounded-lg transition-colors"
+                        className="bg-indigo-500 hover:bg-indigo-600 text-white font-medium px-6 py-3 rounded-lg transition-colors"
                     >
                         Get teams
                     </button>
@@ -195,7 +228,7 @@ export default function Dashboard() {
                     </button>
                 </form>
 
-                {/* BOTÓN DE SIGN OUT */}
+                {/* BOTÓN: SIGN OUT */}
                 <div className="text-center pt-6">
                     <button
                         onClick={handleSignOut}
@@ -204,6 +237,92 @@ export default function Dashboard() {
                         Sign Out
                     </button>
                 </div>
+
+                {/* LISTA DE EQUIPOS */}
+                <div className="bg-white p-6 rounded-lg shadow border border-slate-200 space-y-4">
+                    <h2 className="text-xl font-semibold text-slate-700">Equipos</h2>
+                    {teams.length === 0 ? (
+                        <p>No hay equipos registrados.</p>
+                    ) : (
+                        <ul>
+                            {teams.map((team) => (
+                                <li
+                                    key={team.id}
+                                    className="flex justify-between items-center border-b py-2"
+                                >
+                                    <div>
+                                        <h3 className="font-semibold text-slate-800">
+                                            {team.name}
+                                        </h3>
+                                        <p className="text-slate-600">
+                                            {team.description}
+                                        </p>
+                                    </div>
+                                    <div className="space-x-2">
+                                        <button
+                                            onClick={() => handleEditTeam(team)}
+                                            className="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-4 rounded-lg"
+                                        >
+                                            Actualizar
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteTeam(team.id)}
+                                            className="bg-red-500 hover:bg-red-600 text-white py-1 px-4 rounded-lg"
+                                        >
+                                            Eliminar
+                                        </button>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+
+                {/* FORMULARIO DE EDICIÓN DE EQUIPO */}
+                {editingTeam && (
+                    <form
+                        onSubmit={handleUpdateTeam}
+                        className="bg-white p-6 rounded-lg shadow border border-slate-200 space-y-4"
+                    >
+                        <h2 className="text-xl font-semibold text-slate-700">
+                            Editar Equipo
+                        </h2>
+                        <input
+                            type="text"
+                            placeholder="Nombre del equipo"
+                            value={editingTeam.name}
+                            onChange={(e) =>
+                                setEditingTeam({ ...editingTeam, name: e.target.value })
+                            }
+                            className="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
+                        />
+
+                        <textarea
+                            placeholder="Descripción"
+                            value={editingTeam.description}
+                            onChange={(e) =>
+                                setEditingTeam({ ...editingTeam, description: e.target.value })
+                            }
+                            className="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
+                        />
+
+                        <div className="flex justify-between">
+                            <button
+                                type="button"
+                                onClick={() => setEditingTeam(null)}
+                                className="bg-gray-400 hover:bg-gray-500 text-white font-medium py-2 px-4 rounded-lg"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="submit"
+                                className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg"
+                            >
+                                Guardar cambios
+                            </button>
+                        </div>
+                    </form>
+                )}
 
                 {/* ESTADOS */}
                 {loading && (
