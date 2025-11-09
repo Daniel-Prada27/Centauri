@@ -133,7 +133,7 @@ model Task {
     id_team        String   @db.Uuid
     id_responsible String
     name           String   @db.VarChar(50)
-    status         String   @db.VarChar(20)
+    status         String   @db.VarChar(20) @default("pending")
     priority       String   @db.VarChar(20)
     type           String   @db.VarChar(30)
     due_date       DateTime @db.Date //Debe pasasrse como objeto Date() por un bug (documentacion)

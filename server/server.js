@@ -7,6 +7,7 @@ import { auth } from "#server/lib/auth.js";
 import {userProfileRouter} from '#server/routes/user_profile.routes.js'
 import {teamRouter} from '#server/routes/team.routes.js'
 import {memberRouter} from '#server/routes/member.routes.js'
+import {taskRouter} from '#server/routes/task.routes.js'
 
 
 const corsOptions = {
@@ -25,6 +26,7 @@ app.use(express.json())
 app.use('/profile', userProfileRouter);
 app.use('/team', teamRouter);
 app.use('/member', memberRouter);
+app.use('/task', taskRouter);
 
 app.get('/api', (req, res) => {
     res.json({"users": ["Jaime", "Sara", "Prada"]})
