@@ -11,6 +11,11 @@ memberRouter.post('/invite',
     controller.inviteMember
 );
 
+memberRouter.post('/invite/accept',
+    ValidateSession.validateSession,
+    SchemaValidation.validateMemberInvite,
+    controller.acceptInvite
+);
 
 memberRouter.get('/:teamId',
     ValidateSession.validateSession,
