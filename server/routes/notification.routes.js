@@ -10,3 +10,7 @@ notificationRouter.get('',
     controller.readAllNotifications
 );
 
+notificationRouter.delete("/:notificationId",
+    ValidateSession.validateSession,
+    controller.deleteNotification
+)

@@ -18,6 +18,20 @@ const checkUserExistence = async (userId) => {
     }
 }
 
+const checkNotificationExistence = async (notificationId) => {
+    const notification = await prisma.notification.findUnique({
+        where: { id: notificationId }
+    })
+
+    if (!notification) {
+        const error = new Error(`Notification doesn't exist`);
+        error.statusCode = 404;
+        throw error
+    }
+
+    return notification
+}
+
 export const createNotification = async (data, recipients) => {
 
     const notification = await prisma.notification.create({ data })
@@ -69,7 +83,7 @@ export const readNotifications = async (userId) => {
                 some: {
                     id_member: userId
                 }
-                
+
             }
         }
     })
@@ -81,4 +95,45 @@ export const readNotifications = async (userId) => {
     }
 
     return notifications
+}
+
+
+export const deleteUserNotification = async (userId, notificationId) => {
+    await checkUserExistence(userId);
+    const notification = await checkNotificationExistence(notificationId)
+
+    if (!notification) {
+        const error = new Error(`Notification doesn't exist`);
+        error.statusCode = 404;
+        throw error
+    }
+
+    console.log(notification);
+    console.log(userId);
+
+    const notificationMember = await prisma.notificationMember.findUnique({
+        where: {
+            id_member_id_notification: {
+                id_member: userId,
+                id_notification: notification.id
+            }
+        }
+    })
+
+    if (!notificationMember) {
+        const error = new Error(`Cant delete other member notification`);
+        error.statusCode = 401;
+        throw error
+    }
+
+    const deletedNotification = await prisma.notificationMember.delete({
+        where: {
+            id_member_id_notification: {
+                id_notification: notification.id,
+                id_member: userId
+            }
+        }
+    })
+
+    return deletedNotification
 }
