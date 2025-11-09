@@ -131,15 +131,15 @@ model Member {
 model Task {
     id             String   @id @default(uuid()) @db.Uuid
     id_team        String   @db.Uuid
-    id_responsible String
+    id_responsible String?
     name           String   @db.VarChar(50)
-    status         String   @db.VarChar(20)
+    status         String   @db.VarChar(20) @default("pending")
     priority       String   @db.VarChar(20)
     type           String   @db.VarChar(30)
     due_date       DateTime @db.Date //Debe pasasrse como objeto Date() por un bug (documentacion)
 
     team        Team @relation(fields: [id_team], references: [id], onDelete: Cascade)
-    responsible User_Profile @relation(fields: [id_responsible], references: [user_id])
+    responsible User_Profile? @relation(fields: [id_responsible], references: [user_id])
 
     Subtasks Subtask[]
     Comment  Comment[]
