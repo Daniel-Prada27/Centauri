@@ -213,7 +213,7 @@ model NotificationMember {
     read            Boolean @default(false)
 
     member       User_Profile         @relation(fields: [id_member], references: [user_id], onDelete: Cascade)
-    notification Notification @relation(fields: [id_notification], references: [id])
+    notification Notification @relation(fields: [id_notification], references: [id], onDelete: Cascade)
 
     @@id([id_member, id_notification])
     @@schema("public")
