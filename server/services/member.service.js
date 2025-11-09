@@ -59,11 +59,7 @@ const checkInviteExistence = async (teamId, userId) => {
         }
     })
 
-    if (exists) {
-        const error = new Error(`User already invited`);
-        error.statusCode = 409;
-        throw error
-    }
+    return exists
 }
 
 export const inviteMember = async (userId, member) => {
@@ -79,7 +75,13 @@ export const inviteMember = async (userId, member) => {
 
     await checkTeamExistence(teamId);
     await checkUserExistence(invitedUserId);
-    await checkInviteExistence(teamId, invitedUserId);
+    const inviteExists = await checkInviteExistence(teamId, invitedUserId);
+
+    if (inviteExists) {
+        const error = new Error(`User already invited`);
+        error.statusCode = 409;
+        throw error
+    }
 
     const owner = await prisma.member.findUnique({
         where: {
@@ -110,7 +112,42 @@ export const inviteMember = async (userId, member) => {
 
 }
 
-export const acceptInvite = async () => {
+export const acceptInvite = async (userId, member) => {
+
+    const teamId = member.id_team
+    const invitedUserId = member.id_user
+
+    if (invitedUserId !== userId) {
+        const error = new Error(`User id does not match invited user id`);
+        error.statusCode = 400;
+        throw error
+    }
+    await checkTeamExistence(teamId);
+    await checkUserExistence(invitedUserId);
+
+    const inviteExists = await checkInviteExistence(teamId, invitedUserId);
+
+    if (!inviteExists) {
+        const error = new Error(`Invite already resolved`);
+        error.statusCode = 409;
+        throw error
+    }
+
+    const updatedInvite = await prisma.member.update({
+        where: {
+            id_user_id_team: {
+                id_team: teamId,
+                id_user: userId
+            }
+        },
+        data: {
+            role: "viewer"
+        }
+    })
+
+
+    return updatedInvite
+
 
 }
 
