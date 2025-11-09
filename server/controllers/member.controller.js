@@ -64,3 +64,18 @@ export const readAllMembers = async (req, res) => {
     }
 }
 
+export const updateMember = async (req, res) => {
+    try {
+        const userId = req.session.user.id
+        const member = MemberSchema.parse(req.body)
+
+        const result = await memberService.updateMember(userId, member)
+        res.status(201).json(result)
+    } catch (error) {
+        if (error.statusCode) {
+            return res.status(error.statusCode).json({ message: error.message });
+        }
+        console.log(error);
+        res.status(500).json({ message: 'Something went wrong!' });
+    }
+}

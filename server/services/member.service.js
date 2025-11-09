@@ -6,6 +6,24 @@ dotenv.config({ path: '../.env' })
 
 const prisma = new PrismaClient()
 
+const isOwner = async (teamId, userId) => {
+    const exists = await prisma.member.findUnique({
+        where: {
+            id_user_id_team: {
+                id_team: teamId,
+                id_user: userId
+            },
+            role: "owner"
+        }
+    })
+
+    if (exists) {
+        return true
+    }
+
+    return false
+}
+
 const checkTeamExistence = async (teamId) => {
     const exists = await prisma.team.findUnique({
         where: { id: teamId }
@@ -37,7 +55,7 @@ const checkMemberExistence = async (teamId, userId) => {
                 id_team: teamId,
                 id_user: userId
             },
-            role : {
+            role: {
                 not: "pending"
             }
         }
@@ -214,3 +232,41 @@ export const readAllMembers = async (teamId) => {
 }
 
 
+export const updateMember = async (userId, member) => {
+
+    const teamId = member.id_team
+    const targetUserId = member.id_user
+    const role = member.role
+
+    if (!await isOwner(teamId, userId)) {
+        const error = new Error(`Only team owner can update members`);
+        error.statusCode = 401;
+        throw error
+    }
+
+    await checkTeamExistence(teamId);
+    const memberExists = await checkMemberExistence(teamId, targetUserId)
+
+    if (!memberExists) {
+        const error = new Error(`Member not found`);
+        error.statusCode = 404;
+        throw error
+    }
+
+    const updatedInvite = await prisma.member.update({
+        where: {
+            id_user_id_team: {
+                id_team: teamId,
+                id_user: targetUserId
+            }
+        },
+        data: {
+            role: role
+        }
+    })
+
+
+    return updatedInvite
+
+
+}

@@ -27,3 +27,9 @@ memberRouter.get('/:teamId',
     ValidateSession.validateSession,
     controller.readAllMembers
 );
+
+memberRouter.put('',
+    ValidateSession.validateSession,
+    SchemaValidation.validateMember,
+    controller.updateMember
+);

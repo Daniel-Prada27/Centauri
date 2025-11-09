@@ -1,6 +1,6 @@
 import { UserProfileSchema } from '#server/models/schema.user_profile.js';
 import { TeamSchema } from '#server/models/schema.team.js'
-import { MemberInviteSchema } from '#server/models/schema.member.js'
+import { MemberSchema, MemberInviteSchema } from '#server/models/schema.member.js'
 
 export const validateUserProfile = (req, res, next) => {
     try {
@@ -23,6 +23,15 @@ export const validateTeam = (req, res, next) => {
 export const validateMemberInvite = (req, res, next) => {
     try {
         MemberInviteSchema.parse(req.body);
+        next();
+    } catch (error) {
+        return res.status(400).json({ message: 'Invalid request body', details: error.errors });
+    }
+};
+
+export const validateMember = (req, res, next) => {
+    try {
+        MemberSchema.parse(req.body);
         next();
     } catch (error) {
         return res.status(400).json({ message: 'Invalid request body', details: error.errors });
