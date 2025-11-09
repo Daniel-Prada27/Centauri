@@ -5,7 +5,13 @@ import * as ValidateSession from '#server/middleware/validateSession.js'
 
 export const memberRouter = express.Router();
 
+memberRouter.post('/invite',
+    ValidateSession.validateSession,
+    controller.inviteMember
+);
+
 
 memberRouter.get('/:teamId',
     ValidateSession.validateSession,
-    controller.readAllMembers);
+    controller.readAllMembers
+);
