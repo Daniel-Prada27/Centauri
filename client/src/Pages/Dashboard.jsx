@@ -73,7 +73,7 @@ export default function Dashboard() {
     // -----------------------------
     const handleUpdateProfile = async (e) => {
         e.preventDefault();
-        await makeRequest("/profile/update-profile", "PUT", profile);
+        await makeRequest("/profile", "PUT", profile);
     };
 
     // -----------------------------
@@ -100,7 +100,7 @@ export default function Dashboard() {
 
     const handleGetTeams = async (e) => {
         e.preventDefault();
-        const data = await makeRequest("/team/get-teams", "GET");
+        const data = await makeRequest("/team", "GET");
         setTeams(data || []);
     };
 
