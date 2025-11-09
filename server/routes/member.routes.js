@@ -33,3 +33,15 @@ memberRouter.put('',
     SchemaValidation.validateMember,
     controller.updateMember
 );
+
+memberRouter.delete('',
+    ValidateSession.validateSession,
+    SchemaValidation.validateMemberInvite,
+    controller.deleteMember
+);
+
+memberRouter.delete('/leave',
+    ValidateSession.validateSession,
+    SchemaValidation.validateMemberInvite,
+    controller.leave
+);

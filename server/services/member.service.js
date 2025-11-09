@@ -270,3 +270,85 @@ export const updateMember = async (userId, member) => {
 
 
 }
+
+export const deleteMember = async (userId, member) => {
+
+    const teamId = member.id_team
+    const targetUserId = member.id_user
+
+    if (!await isOwner(teamId, userId)) {
+        const error = new Error(`Only team owner can remove members`);
+        error.statusCode = 401;
+        throw error
+    }
+
+    if (userId === targetUserId) {
+        const error = new Error(`Owner can't remove itself, delete team instead`);
+        error.statusCode = 400;
+        throw error
+    }
+
+    await checkTeamExistence(teamId);
+    const memberExists = await checkMemberExistence(teamId, targetUserId)
+
+    if (!memberExists) {
+        const error = new Error(`Member not found`);
+        error.statusCode = 404;
+        throw error
+    }
+
+    const removedMember = await prisma.member.delete({
+        where: {
+            id_user_id_team: {
+                id_team: teamId,
+                id_user: targetUserId
+            }
+        }
+    })
+
+
+    return removedMember
+
+
+}
+
+export const leave = async (userId, member) => {
+
+    const teamId = member.id_team
+    const targetUserId = member.id_user
+
+    if (await isOwner(teamId, userId)) {
+        const error = new Error(`Owner can't leave team`);
+        error.statusCode = 401;
+        throw error
+    }
+
+    if (targetUserId !== userId) {
+        const error = new Error(`Can't leave on behalf of other member`);
+        error.statusCode = 401;
+        throw error
+    }
+
+    await checkTeamExistence(teamId);
+    const memberExists = await checkMemberExistence(teamId, targetUserId)
+
+    if (!memberExists) {
+        const error = new Error(`Member not found`);
+        error.statusCode = 404;
+        throw error
+    }
+
+    const removedMember = await prisma.member.delete({
+        where: {
+            id_user_id_team: {
+                id_team: teamId,
+                id_user: targetUserId
+            }
+        }
+    })
+
+
+    return removedMember
+
+
+}
