@@ -26,7 +26,7 @@ function Login() {
 
             // Verificar si pertenece a algún equipo
             await checkUserTeam(user.user_id);
-            
+
             } catch (err) {
             console.error("Error al obtener usuario:", err);
             alert("Error al validar sesión ❌");
@@ -47,7 +47,7 @@ function Login() {
         // Modificar para cuando haya mas de 1 team poder elegir entre opciones
         if (Array.isArray(teams) && teams.length > 0) {
         console.log("Usuario pertenece a equipo:", teams[0]);
-        navigate("/boardpage");
+        navigate("/teamspage");
 
 
         } else {

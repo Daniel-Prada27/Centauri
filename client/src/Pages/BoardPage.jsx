@@ -5,10 +5,17 @@ function BoardPage() {
   const [user, setUser] = useState(null);
   const [team, setTeam] = useState(null);
   const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [newTask, setNewTask] = useState("");
 
-  const statuses = ["Pendiente", "En progreso", "Completado"];
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [message, setMessage] = useState(null);
+
+  const statuses = [
+    { key: "pending", label: "Pendiente" },
+    { key: "in_progress", label: "En progreso" },
+    { key: "completed", label: "Completado" },
+  ];
 
   // Obtener usuario actual (sesión activa)
   const fetchUser = async () => {
@@ -71,49 +78,98 @@ function BoardPage() {
     loadAll();
   }, []);
 
-  //crear tarea
-  const handleAddTask = async () => {
-    if (!newTask.trim()) return alert("Ingresa el nombre de la tarea");
+  const makeRequest = async (endpoint, method, body, customHeaders = {}) => {
+        setLoading(true);
+        setError(null);
+        setMessage(null);
 
-    try {
+        try {
+            const response = await fetch(`http://localhost:3000${endpoint}`, {
+                method,
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...customHeaders,
+                },
+                body: body ? JSON.stringify(body) : undefined,
+            });
+
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.message || "Request failed");
+            }
+
+            const data = await response.json();
+            setMessage(data.message || "Operación exitosa");
+            console.log(data);
+            return data;
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+  };
+
+  //crear tarea
+  const handleAddTask = async (e) => {
+    e.preventDefault();
       const body = {
         id_team: team.id,
-        id_responsible: user.id,
+        id_responsible: user.user_id,
         name: newTask.trim(),
         priority: "low",
         type: "business",
         due_date: "2025-12-01",
+        status: "pending"
+      };
+    const updated =await makeRequest("/task", "POST", body);
+    if (updated) {
+      const refreshed = await fetchTeamTasks(team.id);
+      setTasks(refreshed);
+    }
+  };
+
+  // Cambiar estado de una tarea
+  const handleTaskUpdate = async (taskId, updates) => {
+    try {
+      const currentTask = tasks.find((t) => t.id === taskId);
+      if (!currentTask) throw new Error("Tarea no encontrada");
+
+      // Combinar la tarea actual con los nuevos cambios
+      const updatedTask = {
+        ...currentTask,
+        ...updates,
+        id_team: team.id,
+        id_responsible: currentTask.id_responsible || user.user_id,
       };
 
-      const res = await fetch(`http://localhost:3000/task`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      if (!res.ok) {
-        const errText = await res.text();
-        console.error("Error creando tarea:", errText);
-        alert("No tienes permisos o la tarea ya existe ❌");
-        return;
+      // El backend espera fechas válidas, no objetos Date
+      if (updatedTask.due_date instanceof Date) {
+        updatedTask.due_date = updatedTask.due_date.toISOString();
       }
 
-      const created = await res.json();
-      setTasks((prev) => [...prev, created]);
-      setNewTask("");
-    } catch (error) {
-      console.error(error);
-      alert("Error de conexión con el servidor ❌");
+      const updated = await makeRequest(`/task/${taskId}`, "PUT", updatedTask);
+      if (updated) {
+        const refreshed = await fetchTeamTasks(team.id);
+        setTasks(refreshed);
+      }
+    } catch (err) {
+      console.error("Error al actualizar tarea:", err);
+      setError("No se pudo actualizar la tarea.");
+    }
+  };
+
+  // Eliminar tarea
+  const handleDeleteTask = async (taskId) => {
+    if (!window.confirm("¿Eliminar esta tarea?")) return;
+    const deleted = await makeRequest(`/task/${taskId}`, "DELETE");
+    if (deleted) {
+      setTasks(tasks.filter((t) => t.id !== taskId));
     }
   };
 
   // Cerrar sesión
-  const handleLogout = async () => {
-
-    //await fetch("http://localhost:3000/profile", {
-    //  method: "POST",
-    //  credentials: "include",
-    //});
+  const handleLogout = () => {
     window.location.href = "/login";
   };
 
@@ -125,7 +181,7 @@ function BoardPage() {
         <div>
           <h2>{team?.name}</h2>
           <p style={{ color: "#5e6c84" }}>
-            👤 {user?.name} — {user?.email}
+            👤 {user?.user["name"]} — {user?.user["email"]}
           </p>
         </div>
 
@@ -147,31 +203,58 @@ function BoardPage() {
       </div>
 
       <div className="kanban-board">
-        {statuses.map((status) => (
-          <div key={status} className="kanban-column">
-            <h3>{status}</h3>
+        {statuses.map((st) => (
+          <div key={st.key} className="kanban-column">
+            <h3>{st.label}</h3>
+
             {tasks
-              .filter((t) => t.status === status)
+              .filter((t) => t.status === st.key)
               .map((t) => (
                 <div key={t.id} className="kanban-card">
-                  <p className="task-title">{t.title}</p>
+                  <p className="task-title">
+                    {t.name}{" "}
+                  </p>
+
                   <small>
-                    🗓️ {new Date(t.createdAt).toLocaleString()}
-                    <br />👤 {t.createdBy}
+                    🗓️ {new Date(t.due_date).toLocaleDateString()}
+                    <br />👤 {user?.user["name"]}
                   </small>
-                  <select
-                    value={t.status}
-                    onChange={(e) =>
-                      handleStatusChange(t.id, e.target.value)
-                    }
-                  >
-                    {statuses.map((s) => (
-                      <option key={s}>{s}</option>
-                    ))}
-                  </select>
-                  <div className="task-buttons">
-                    <button onClick={() => handleEditTask(t.id)}>✏️</button>
-                    <button onClick={() => handleDeleteTask(t.id)}>🗑️</button>
+
+                  <div className="task-controls">
+                    <div className="dropdown-group">
+                      <label>Estado:</label>
+                      <select
+                        value={t.status}
+                        onChange={(e) =>
+                          handleTaskUpdate(t.id, { status: e.target.value })
+                        }
+                      >
+                        <option value="pending">Pendiente</option>
+                        <option value="in_progress">En progreso</option>
+                        <option value="completed">Completado</option>
+                      </select>
+                    </div>
+
+                    <div className="dropdown-group">
+                      <label>Prioridad:</label>
+                      <select
+                        value={t.priority}
+                        onChange={(e) =>
+                          handleTaskUpdate(t.id, { priority: e.target.value })
+                        }
+                      >
+                        <option value="low">Baja</option>
+                        <option value="medium">Media</option>
+                        <option value="high">Alta</option>
+                      </select>
+                    </div>
+
+                    <button
+                      className="mini-btn delete"
+                      onClick={() => handleDeleteTask(t.id)}
+                    >
+                      🗑️
+                    </button>
                   </div>
                 </div>
               ))}
@@ -180,6 +263,7 @@ function BoardPage() {
       </div>
     </div>
   );
+
 }
 
 export default BoardPage;

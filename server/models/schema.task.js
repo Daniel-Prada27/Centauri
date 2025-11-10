@@ -17,4 +17,6 @@ export const TaskCreationSchema = z.object({
   priority: z.enum(["low", "medium", "high"]).or(z.string().max(20)),
   type: z.string().max(30),
   due_date: z.coerce.date(),
+  status: z.enum(["pending", "in_progress", "completed"])
+           .default("pending"),
 });
