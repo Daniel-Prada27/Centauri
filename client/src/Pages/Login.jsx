@@ -41,20 +41,8 @@ function Login() {
         });
 
         if (!res.ok) throw new Error("Error al obtener equipos del usuario");
-
-        const teams = await res.json();
-
-        // Modificar para cuando haya mas de 1 team poder elegir entre opciones
-        if (Array.isArray(teams) && teams.length > 0) {
-        console.log("Usuario pertenece a equipo:", teams[0]);
+        console.log("Redirigiendo a teamspage");
         navigate("/teamspage");
-
-
-        } else {
-        // No pertenece a ningún equipo → redirigir a creación/unión
-        console.log("Usuario sin equipo, redirigiendo a teamspage");
-        navigate("/teamspage");
-        }
     } catch (err) {
         console.error("Error al comprobar equipo:", err);
         alert("No se pudo validar si el usuario tiene equipo ❌");

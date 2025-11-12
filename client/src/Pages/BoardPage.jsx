@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
 import "../estilos/BoardPage.css";
+import { useParams } from "react-router-dom";
 
 function BoardPage() {
   const [user, setUser] = useState(null);
   const [team, setTeam] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
-
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
+  const { id } = useParams(); // <-- ID del equipo desde la URL
 
   const statuses = [
     { key: "pending", label: "Pendiente" },
@@ -26,14 +27,17 @@ function BoardPage() {
     return await res.json();
   };
 
-  // Obtener equipo asociado al usuario
-  const fetchUserTeam = async (userId) => {
+  // Obtener equipos del usuario y buscar el que coincide con el id de la URL
+  const fetchUserTeam = async () => {
     const res = await fetch(`http://localhost:3000/team`, {
       credentials: "include",
     });
-    if (!res.ok) throw new Error("Error buscando equipo del usuario");
+    if (!res.ok) throw new Error("Error buscando equipos del usuario");
     const data = await res.json();
-    return data.length > 0 ? data[0] : null; // el primer equipo si pertenece a alguno
+
+    // Buscar el equipo cuyo id coincida con el parámetro
+    const foundTeam = data.find((t) => t.id === id);
+    return foundTeam || null;
   };
 
   // Obtener tareas del equipo
@@ -48,94 +52,91 @@ function BoardPage() {
   useEffect(() => {
     const loadAll = async () => {
       try {
-        // Paso 1: obtener usuario autenticado
+        setLoading(true);
         const userData = await fetchUser();
         setUser(userData);
         console.log("Usuario actual:", userData);
 
-        // Paso 2: buscar equipo del usuario
-        const teamData = await fetchUserTeam(userData.id);
+        const teamData = await fetchUserTeam();
         if (!teamData) {
-          alert("No estás en ningún equipo. Redirigiendo...");
+          alert("No perteneces a este equipo o no existe ⚠️");
           window.location.href = "/teamspage";
           return;
         }
-        setTeam(teamData);
-        console.log("Team actual:", teamData);
 
-        // Paso 3: cargar tareas del equipo
+        setTeam(teamData);
+        console.log("Equipo actual:", teamData);
+
         const taskData = await fetchTeamTasks(teamData.id);
         setTasks(taskData);
-
-        setLoading(false);
       } catch (err) {
         console.error("Error inicializando BoardPage:", err);
-        alert("No se pudo cargar el tablero ❌");
-        window.location.href = "/login";
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
     };
 
     loadAll();
-  }, []);
+  }, [id]);
 
+  // 🔧 Reutilizable para llamadas
   const makeRequest = async (endpoint, method, body, customHeaders = {}) => {
-        setLoading(true);
-        setError(null);
-        setMessage(null);
+    setLoading(true);
+    setError(null);
+    setMessage(null);
 
-        try {
-            const response = await fetch(`http://localhost:3000${endpoint}`, {
-                method,
-                credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                    ...customHeaders,
-                },
-                body: body ? JSON.stringify(body) : undefined,
-            });
+    try {
+      const response = await fetch(`http://localhost:3000${endpoint}`, {
+        method,
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...customHeaders,
+        },
+        body: body ? JSON.stringify(body) : undefined,
+      });
 
-            if (!response.ok) {
-                const errData = await response.json();
-                throw new Error(errData.message || "Request failed");
-            }
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.message || "Request failed");
+      }
 
-            const data = await response.json();
-            setMessage(data.message || "Operación exitosa");
-            console.log(data);
-            return data;
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
+      const data = await response.json();
+      setMessage(data.message || "Operación exitosa");
+      return data;
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  //crear tarea
+  // Crear tarea
   const handleAddTask = async (e) => {
     e.preventDefault();
-      const body = {
-        id_team: team.id,
-        id_responsible: user.user_id,
-        name: newTask.trim(),
-        priority: "low",
-        type: "business",
-        due_date: "2025-12-01",
-        status: "pending"
-      };
-    const updated =await makeRequest("/task", "POST", body);
+    const body = {
+      id_team: team.id,
+      id_responsible: user.user_id,
+      name: newTask.trim(),
+      priority: "low",
+      type: "business",
+      due_date: "2025-12-01",
+      status: "pending",
+    };
+    const updated = await makeRequest("/task", "POST", body);
     if (updated) {
       const refreshed = await fetchTeamTasks(team.id);
       setTasks(refreshed);
     }
   };
 
-  // Cambiar estado de una tarea
+  // Cambiar estado
   const handleTaskUpdate = async (taskId, updates) => {
     try {
       const currentTask = tasks.find((t) => t.id === taskId);
       if (!currentTask) throw new Error("Tarea no encontrada");
 
-      // Combinar la tarea actual con los nuevos cambios
       const updatedTask = {
         ...currentTask,
         ...updates,
@@ -143,7 +144,6 @@ function BoardPage() {
         id_responsible: currentTask.id_responsible || user.user_id,
       };
 
-      // El backend espera fechas válidas, no objetos Date
       if (updatedTask.due_date instanceof Date) {
         updatedTask.due_date = updatedTask.due_date.toISOString();
       }
@@ -174,6 +174,7 @@ function BoardPage() {
   };
 
   if (loading) return <p>Cargando...</p>;
+  if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
     <div className="board-container">
@@ -181,7 +182,7 @@ function BoardPage() {
         <div>
           <h2>{team?.name}</h2>
           <p style={{ color: "#5e6c84" }}>
-            👤 {user?.user["name"]} — {user?.user["email"]}
+            👤 {user?.user?.name} — {user?.user?.email}
           </p>
         </div>
 
@@ -211,13 +212,10 @@ function BoardPage() {
               .filter((t) => t.status === st.key)
               .map((t) => (
                 <div key={t.id} className="kanban-card">
-                  <p className="task-title">
-                    {t.name}{" "}
-                  </p>
-
+                  <p className="task-title">{t.name}</p>
                   <small>
                     🗓️ {new Date(t.due_date).toLocaleDateString()}
-                    <br />👤 {user?.user["name"]}
+                    <br />👤 {user?.user?.name}
                   </small>
 
                   <div className="task-controls">
@@ -263,7 +261,6 @@ function BoardPage() {
       </div>
     </div>
   );
-
 }
 
 export default BoardPage;

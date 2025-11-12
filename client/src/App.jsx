@@ -22,7 +22,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/teamspage" element={<TeamsPage />} />
-          <Route path="/boardpage" element={<BoardPage />} />
+          <Route path="/boardpage/:id" element={<BoardPage />} />
         </Route>
 
         {/* Rutas privadas: solo accesibles si SÍ estás logueado */}

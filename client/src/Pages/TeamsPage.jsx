@@ -1,5 +1,5 @@
-import React, { useState } from "react";
 import "../estilos/Login.css";
+import React, { useEffect, useState } from "react";
 
 function TeamsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -7,6 +7,24 @@ function TeamsPage() {
   const [teamName, setTeamName] = useState("");
   const [teamDescription, setTeamDescription] = useState("");
   const [joinCode, setJoinCode] = useState("");
+  const [teams, setTeams] = useState([]);
+
+  // Recibe la lista de equipos a los que pertenece el usuario
+  useEffect(() => {
+    const fetchTeams = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/team", {
+          credentials: "include",
+        });
+        if (!res.ok) throw new Error("Error al obtener equipos");
+        const data = await res.json();
+        setTeams(data);
+      } catch (error) {
+        console.error("❌", error);
+      }
+    };
+    fetchTeams();
+  }, []);
 
   // Crear equipo (envía al backend)
   const handleCreateTeam = async (e) => {
@@ -19,9 +37,10 @@ function TeamsPage() {
         body: JSON.stringify({ name: teamName, description: teamDescription }),
       });
 
+      const createdTeam = await res.json();
       if (!res.ok) throw new Error("Error al crear el equipo");
       alert("✅ Equipo creado correctamente");
-      window.location.href = `/boardpage/${team._id}`; 
+      window.location.href = `/boardpage/${createdTeam.id}`; 
       setShowCreateModal(false);
       setTeamName("");
       setTeamDescription("");
@@ -34,7 +53,7 @@ function TeamsPage() {
   const handleJoinTeam = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`http://localhost:5000/api/teams/join`, {
+      const res = await fetch(`http://localhost:3000/team`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ teamId: joinCode }),
@@ -42,7 +61,8 @@ function TeamsPage() {
 
       if (!res.ok) throw new Error("No se pudo unir al equipo");
       alert("✅ Te uniste al equipo correctamente");
-      window.location.href = `/board/${team._id}`; 
+
+      window.location.href = `/boardpage/${teamId.id}`; 
       setShowJoinModal(false);
       setJoinCode("");
     } catch (error) {
@@ -55,7 +75,7 @@ function TeamsPage() {
     alert("👋 Sesión cerrada");
     window.location.href = "/login";
   };
-
+  
   return (
     <div className="login-container">
       <div className="login-card">
@@ -73,7 +93,31 @@ function TeamsPage() {
           <span></span>
         </div>
 
-        <button className="btn-login" style={{ backgroundColor: "#ff4d4d" }} onClick={handleLogout}>
+        {/* 🧾 Lista de equipos del usuario */}
+        <h3 style={{ marginTop: "15px", color: "#333" }}>Mis equipos</h3>
+        <ul style={{ listStyle: "none", padding: 0 }}>
+          {teams.length > 0 ? (
+            teams.map((team) => (
+              <li key={team.id} style={{ margin: "8px 0" }}>
+                <button
+                  className="btn-login"
+                  style={{ width: "100%", backgroundColor: "#5e72e4" }}
+                  onClick={() => (window.location.href = `/boardpage/${team.id}`)}
+                >
+                  {team.name}
+                </button>
+              </li>
+            ))
+          ) : (
+            <p style={{ color: "#777" }}>No perteneces a ningún equipo todavía</p>
+          )}
+        </ul>
+
+        <button
+          className="btn-login"
+          style={{ backgroundColor: "#ff4d4d" }}
+          onClick={handleLogout}
+        >
           🚪 Cerrar sesión
         </button>
       </div>
