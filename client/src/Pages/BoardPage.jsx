@@ -10,6 +10,7 @@ function BoardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
+  const [inviteUserId, setInviteUserId] = useState("");
   const { id } = useParams(); // <-- ID del equipo desde la URL
 
   const statuses = [
@@ -80,7 +81,7 @@ function BoardPage() {
     loadAll();
   }, [id]);
 
-  // 🔧 Reutilizable para llamadas
+  // Reutilizable para llamadas
   const makeRequest = async (endpoint, method, body, customHeaders = {}) => {
     setLoading(true);
     setError(null);
@@ -109,6 +110,23 @@ function BoardPage() {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Crear invitaciones de equipo a usuarios
+  const handleInviteUser = async (e) => {
+    e.preventDefault();
+    if (!inviteUserId.trim()) return alert("Ingresa un ID de usuario válido");
+
+    const body = {
+      id_team: team.id,
+      id_user: inviteUserId.trim(),
+    };
+
+    const res = await makeRequest("/member/invite", "POST", body);
+    if (res) {
+      alert("✅ Invitación enviada correctamente");
+      setInviteUserId("");
     }
   };
 
@@ -184,6 +202,16 @@ function BoardPage() {
           <p style={{ color: "#5e6c84" }}>
             👤 {user?.user?.name} — {user?.user?.email}
           </p>
+        </div>
+
+        <div className="invite-section">
+          <input
+            type="text"
+            placeholder="ID de usuario a invitar..."
+            value={inviteUserId}
+            onChange={(e) => setInviteUserId(e.target.value)}
+          />
+          <button onClick={handleInviteUser}>✉️ Enviar invitación</button>
         </div>
 
         <div className="header-actions">
