@@ -160,16 +160,7 @@ function BoardPage() {
     <div style={{ display: "flex", height: "100vh" }}>
     
     {/* SIDEBAR DE EQUIPOS */}
-    <div
-      style={{
-        width: "320px",
-        height: "100vh",
-        overflowY: "auto",
-        padding: "1rem",
-        background: "#f5f6fa",
-        borderRight: "1px solid #ddd",
-      }}
-    >
+    <div className="teams-sidebar">
       <TeamsSidebar />
     </div>
 

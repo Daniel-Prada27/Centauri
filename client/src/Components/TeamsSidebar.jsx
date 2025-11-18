@@ -1,4 +1,5 @@
-import "../estilos/Login.css";
+import "../estilos/TeamsPage.css";
+import "../estilos/TeamsSidebar.css";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -11,8 +12,8 @@ import {
   createTeam,
   acceptInvite,
   rejectInvite,
-  makeRequest,
-  signOut
+  makeRequest
+  
 } from "../utils/api"
 
 export default function TeamsSidebar() {
@@ -35,6 +36,9 @@ export default function TeamsSidebar() {
 
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
+
+  const [openInvites, setOpenInvites] = useState(null);
+  const [openTeams, setOpenTeams] = useState(null);
 
   const navigate = useNavigate();
 
@@ -169,229 +173,194 @@ export default function TeamsSidebar() {
   };
 
   return (
-      <div className="login-card">
-        <h2 className="login-title">Gestor de Equipos</h2>
+    <div className="teams-panel">
+        <h2 className="teams-title">Gestor de Equipos</h2>
 
-        <button className="btn-login" onClick={() => setShowCreateModal(true)}>
-          ➕ Crear equipo
-        </button>
+        {/* ACCIONES PRINCIPALES */}
+        <div className="teams-actions">
+          <button className="btn-primary" onClick={() => setShowCreateModal(true)}>
+            ➕ Crear equipo
+          </button>
 
-        <button className="btn-google" onClick={() => setShowJoinModal(true)}>
-          🔗 Unirse a un equipo
-        </button>
+          <button className="btn-secondary" onClick={() => setShowJoinModal(true)}>
+            🔗 Unirse a un equipo
+          </button>
+        </div>
 
-        {/* LISTA DE EQUIPOS */}
-        <h3 style={{ marginTop: "1.5rem" }}>Mis equipos</h3>
+        {/* LISTA DE EQUIPOS --------------------- */}
+        <div className="accordion">
+          <button className="accordion-header" onClick={() => setOpenTeams(!openTeams)}>
+            Mis equipos
+          </button>
 
-        {teams.length > 0 ? (
-          teams.map(team => (
-            <div
-              key={team.id}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: "1rem",
-                marginTop: "0.5rem",
-              }}
-            >
-              <button
-                className="btn-login"
-                style={{ flex: 1, backgroundColor: "#5e72e4" }}
-                onClick={() => navigate(`/boardpage/${team.id}`)}
-              >
-                {team.name}
-              </button>
+          {openTeams && (
+            <div className="accordion-content">
+              {teams.length > 0 ? (
+                teams.map(team => (
+                  <div key={team.id} className="team-row">
 
-              {/* BOTÓN EDITAR */}
-              <button
-                className="btn-login"
-                style={{ backgroundColor: "#f5a623" }}
-                onClick={() => {
-                  setSelectedTeam(team);
-                  setEditName(team.name);
-                  setEditDescription(team.description);
-                  setShowEditModal(true);
-                }}
-              >
-                ✏️
-              </button>
+                    <button
+                      className="btn-primary team-button"
+                      onClick={() => navigate(`/boardpage/${team.id}`)}
+                    >
+                      {team.name}
+                    </button>
 
-              {/* BOTÓN ELIMINAR */}
-              <button
-                className="btn-google"
-                style={{ backgroundColor: "#ff4d4d" }}
-                onClick={() => {
-                  setSelectedTeam(team);
-                  setShowDeleteModal(true);
-                }}
-              >
-                🗑️
-              </button>
+                    <button
+                      className="btn-warning icon-btn"
+                      onClick={() => {
+                        setSelectedTeam(team);
+                        setEditName(team.name);
+                        setEditDescription(team.description);
+                        setShowEditModal(true);
+                      }}
+                    >
+                      ✏️
+                    </button>
+
+                    <button
+                      className="btn-danger icon-btn"
+                      onClick={() => {
+                        setSelectedTeam(team);
+                        setShowDeleteModal(true);
+                      }}
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <p className="empty-text">No perteneces a ningún equipo</p>
+              )}
             </div>
-          ))
-        ) : (
-          <p>No perteneces a ningún equipo</p>
-        )}
+          )}
+        </div>
 
-        {/* INVITACIONES */}
-        <h3 style={{ marginTop: "2rem" }}>Invitaciones pendientes</h3>
-        {invitations.length === 0 ? (
-          <p>No tienes invitaciones pendientes.</p>
-        ) : (
-          invitations.map(inv => (
-            <div key={inv.id} style={{ margin: "1rem 0" }}>
-              <strong>{inv.name}</strong>
-              <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
-                <button className="btn-login" onClick={() => handleAcceptInvite(inv.id)}>
-                  Aceptar
-                </button>
-                <button className="btn-google" onClick={() => handleRejectInvite(inv.id)}>
-                  Rechazar
-                </button>
+        {/* INVITACIONES ------------------------ */}
+        <div className="accordion">
+          <button className="accordion-header" onClick={() => setOpenInvites(!openInvites)}>
+            Invitaciones pendientes
+          </button>
+
+          {openInvites && (
+            <div className="accordion-content">
+              {invitations.length === 0 ? (
+                <p className="empty-text">No tienes invitaciones pendientes.</p>
+              ) : (
+                invitations.map(inv => (
+                  <div key={inv.id} className="invite-item">
+                    <strong>{inv.name}</strong>
+
+                    <div className="invite-actions">
+                      <button className="btn-primary" onClick={() => handleAcceptInvite(inv.id)}>
+                        Aceptar
+                      </button>
+                      <button className="btn-danger" onClick={() => handleRejectInvite(inv.id)}>
+                        Rechazar
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+
+      {/* MODAL CREAR EQUIPO */}
+      {showCreateModal && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <h3>Crear nuevo equipo</h3>
+
+            <form onSubmit={handleCreateTeam}>
+              <div className="form-group">
+                <label>Nombre del equipo</label>
+                <input type="text" value={teamName} onChange={(e) => setTeamName(e.target.value)} required />
               </div>
-            </div>
-          ))
-        )}
-        
 
-        {/* MODAL CREAR EQUIPO */}
-        {showCreateModal && (
-          <div className="modal-overlay">
-            <div className="modal-card">
-              <h3>Crear nuevo equipo</h3>
-              <form onSubmit={handleCreateTeam}>
-                <div className="form-group">
-                  <label>Nombre del equipo</label>
-                  <input
-                    type="text"
-                    value={teamName}
-                    onChange={(e) => setTeamName(e.target.value)}
-                    required
-                  />
-                </div>
+              <div className="form-group">
+                <label>Descripción</label>
+                <input type="text" value={teamDescription} onChange={(e) => setTeamDescription(e.target.value)} required />
+              </div>
 
-                <div className="form-group">
-                  <label>Descripción</label>
-                  <input
-                    type="text"
-                    value={teamDescription}
-                    onChange={(e) => setTeamDescription(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <button className="btn-login" type="submit">
-                  Crear
-                </button>
-                <button
-                  type="button"
-                  className="btn-google"
-                  onClick={() => setShowCreateModal(false)}
-                >
-                  Cancelar
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* MODAL UNIRSE */}
-        {showJoinModal && (
-          <div className="modal-overlay">
-            <div className="modal-card">
-              <h3>Unirse a un equipo</h3>
-              <form onSubmit={handleJoinTeam}>
-                <div className="form-group">
-                  <label>ID del equipo</label>
-                  <input
-                    type="text"
-                    value={joinCode}
-                    onChange={(e) => setJoinCode(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <button className="btn-login" type="submit">Unirse</button>
-                <button
-                  type="button"
-                  className="btn-google"
-                  onClick={() => setShowJoinModal(false)}
-                >
-                  Cancelar
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* MODAL EDITAR EQUIPO */}
-        {showEditModal && (
-          <div className="modal-overlay">
-            <div className="modal-card">
-              <h3>Editar equipo</h3>
-              <form onSubmit={handleUpdateTeam}>
-                <div className="form-group">
-                  <label>Nombre</label>
-                  <input
-                    type="text"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Descripción</label>
-                  <input
-                    type="text"
-                    value={editDescription}
-                    onChange={(e) => setEditDescription(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <button className="btn-login" type="submit">Guardar cambios</button>
-                <button
-                  type="button"
-                  className="btn-google"
-                  onClick={() => setShowEditModal(false)}
-                >
-                  Cancelar
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* MODAL BORRAR EQUIPO */}
-        {showDeleteModal && (
-          <div className="modal-overlay">
-            <div className="modal-card">
-              <h3>¿Eliminar equipo?</h3>
-              <p style={{ marginBottom: "1rem" }}>
-                Esta acción no se puede deshacer.
-              </p>
-
-              <button
-                className="btn-google"
-                style={{ backgroundColor: "#ff4d4d" }}
-                onClick={handleDeleteTeam}
-              >
-                Confirmar eliminación
+              <button className="btn-primary" type="submit">Crear</button>
+              <button className="btn-secondary" type="button" onClick={() => setShowCreateModal(false)}>
+                Cancelar
               </button>
+            </form>
+          </div>
+        </div>
+      )}
 
+      {/* MODAL UNIRSE */}
+      {showJoinModal && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <h3>Unirse a un equipo</h3>
+
+            <form onSubmit={handleJoinTeam}>
+              <div className="form-group">
+                <label>ID del equipo</label>
+                <input type="text" value={joinCode} onChange={(e) => setJoinCode(e.target.value)} required />
+              </div>
+
+              <button className="btn-primary" type="submit">Unirse</button>
               <button
-                className="btn-login"
-                onClick={() => setShowDeleteModal(false)}
+                className="btn-secondary"
+                type="button"
+                onClick={() => setShowJoinModal(false)}
               >
                 Cancelar
               </button>
-            </div>
+            </form>
           </div>
-        )}
         </div>
+      )}
 
+      {/* MODAL EDITAR */}
+      {showEditModal && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <h3>Editar equipo</h3>
 
+            <form onSubmit={handleUpdateTeam}>
+              <div className="form-group">
+                <label>Nombre</label>
+                <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} required />
+              </div>
+
+              <div className="form-group">
+                <label>Descripción</label>
+                <input type="text" value={editDescription} onChange={(e) => setEditDescription(e.target.value)} required />
+              </div>
+
+              <button className="btn-primary" type="submit">Guardar cambios</button>
+              <button className="btn-secondary" type="button" onClick={() => setShowEditModal(false)}>
+                Cancelar
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL BORRAR */}
+      {showDeleteModal && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <h3>¿Eliminar equipo?</h3>
+            <p className="delete-warning">Esta acción no se puede deshacer.</p>
+
+            <button className="btn-danger" onClick={handleDeleteTeam}>
+              Confirmar eliminación
+            </button>
+
+            <button className="btn-secondary" onClick={() => setShowDeleteModal(false)}>
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+
+    </div>
   );
 }
