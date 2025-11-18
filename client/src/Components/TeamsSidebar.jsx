@@ -15,7 +15,7 @@ import {
   signOut
 } from "../utils/api"
 
-function TeamsPage() {
+export default function TeamsSidebar() {
   const [user, setUser] = useState(null);
   const [teams, setTeams] = useState([]);
 
@@ -168,13 +168,7 @@ function TeamsPage() {
     }
   };
 
-  // Logout
-  const handleLogout = () => {
-    signOut(navigate);
-  };
-
   return (
-    <div className="login-container">
       <div className="login-card">
         <h2 className="login-title">Gestor de Equipos</h2>
 
@@ -185,26 +179,6 @@ function TeamsPage() {
         <button className="btn-google" onClick={() => setShowJoinModal(true)}>
           🔗 Unirse a un equipo
         </button>
-
-        {/* INVITACIONES */}
-        <h3 style={{ marginTop: "2rem" }}>Invitaciones pendientes</h3>
-        {invitations.length === 0 ? (
-          <p>No tienes invitaciones pendientes.</p>
-        ) : (
-          invitations.map(inv => (
-            <div key={inv.id} style={{ margin: "1rem 0" }}>
-              <strong>{inv.name}</strong>
-              <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
-                <button className="btn-login" onClick={() => handleAcceptInvite(inv.id)}>
-                  Aceptar
-                </button>
-                <button className="btn-google" onClick={() => handleRejectInvite(inv.id)}>
-                  Rechazar
-                </button>
-              </div>
-            </div>
-          ))
-        )}
 
         {/* LISTA DE EQUIPOS */}
         <h3 style={{ marginTop: "1.5rem" }}>Mis equipos</h3>
@@ -260,14 +234,26 @@ function TeamsPage() {
           <p>No perteneces a ningún equipo</p>
         )}
 
-        <button
-          className="btn-login"
-          style={{ backgroundColor: "#ff4d4d", marginTop: "2rem" }}
-          onClick={handleLogout}
-        >
-          🚪 Cerrar sesión
-        </button>
-        </div>
+        {/* INVITACIONES */}
+        <h3 style={{ marginTop: "2rem" }}>Invitaciones pendientes</h3>
+        {invitations.length === 0 ? (
+          <p>No tienes invitaciones pendientes.</p>
+        ) : (
+          invitations.map(inv => (
+            <div key={inv.id} style={{ margin: "1rem 0" }}>
+              <strong>{inv.name}</strong>
+              <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+                <button className="btn-login" onClick={() => handleAcceptInvite(inv.id)}>
+                  Aceptar
+                </button>
+                <button className="btn-google" onClick={() => handleRejectInvite(inv.id)}>
+                  Rechazar
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+        
 
         {/* MODAL CREAR EQUIPO */}
         {showCreateModal && (
@@ -404,9 +390,8 @@ function TeamsPage() {
             </div>
           </div>
         )}
+        </div>
 
-    </div>
+
   );
 }
-
-export default TeamsPage;

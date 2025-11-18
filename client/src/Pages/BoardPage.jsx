@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "../estilos/BoardPage.css";
+import TeamsSidebar from "../Components/TeamsSidebar";
 import { useParams, useNavigate } from "react-router-dom";
 
 import {
@@ -156,7 +157,25 @@ function BoardPage() {
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
-    <div className="board-container">
+    <div style={{ display: "flex", height: "100vh" }}>
+    
+    {/* SIDEBAR DE EQUIPOS */}
+    <div
+      style={{
+        width: "320px",
+        height: "100vh",
+        overflowY: "auto",
+        padding: "1rem",
+        background: "#f5f6fa",
+        borderRight: "1px solid #ddd",
+      }}
+    >
+      <TeamsSidebar />
+    </div>
+
+    {/* CONTENIDO DEL BOARDPAGE */}
+    <div style={{ flex: 1, overflow: "auto" }}>
+          <div className="board-container">
       <div className="board-header">
         <div>
           <h2>{team?.name}</h2>
@@ -250,6 +269,10 @@ function BoardPage() {
         ))}
       </div>
     </div>
+    </div>
+
+    </div>
+
   );
 }
 
