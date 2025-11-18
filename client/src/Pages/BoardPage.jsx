@@ -1,17 +1,33 @@
 import React, { useEffect, useState } from "react";
 import "../estilos/BoardPage.css";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+
+import {
+  makeRequest,
+  signOut,
+  getProfile,
+  getTeams,
+  getTeamMembers,
+  getTeamTasks,
+  createTask,
+  updateTask,
+  deleteTask,
+  inviteUser
+} from "../utils/api";
 
 function BoardPage() {
   const [user, setUser] = useState(null);
   const [team, setTeam] = useState(null);
   const [tasks, setTasks] = useState([]);
+
+  const [inviteUserId, setInviteUserId] = useState("");
   const [newTask, setNewTask] = useState("");
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [message, setMessage] = useState(null);
-  const [inviteUserId, setInviteUserId] = useState("");
-  const { id } = useParams(); // <-- ID del equipo desde la URL
+
+  const { id } = useParams();
+  const navigate = useNavigate();
 
   const statuses = [
     { key: "pending", label: "Pendiente" },
@@ -19,137 +35,83 @@ function BoardPage() {
     { key: "completed", label: "Completado" },
   ];
 
-  // Obtener usuario actual (sesión activa)
-  const fetchUser = async () => {
-    const res = await fetch("http://localhost:3000/profile", {
-      credentials: "include",
-    });
-    if (!res.ok) throw new Error("Error obteniendo usuario autenticado");
-    return await res.json();
-  };
-
-  // Obtener equipos del usuario y buscar el que coincide con el id de la URL
-  const fetchUserTeam = async () => {
-    const res = await fetch(`http://localhost:3000/team`, {
-      credentials: "include",
-    });
-    if (!res.ok) throw new Error("Error buscando equipos del usuario");
-    const data = await res.json();
-
-    // Buscar el equipo cuyo id coincida con el parámetro
-    const foundTeam = data.find((t) => t.id === id);
-    return foundTeam || null;
-  };
-
-  // Obtener tareas del equipo
-  const fetchTeamTasks = async (teamId) => {
-    const res = await fetch(`http://localhost:3000/task/${teamId}`, {
-      credentials: "include",
-    });
-    if (!res.ok) throw new Error("Error cargando tareas del equipo");
-    return await res.json();
-  };
-
-  useEffect(() => {
-    const loadAll = async () => {
-      try {
-        setLoading(true);
-        const userData = await fetchUser();
-        setUser(userData);
-        console.log("Usuario actual:", userData);
-
-        const teamData = await fetchUserTeam();
-        if (!teamData) {
-          alert("No perteneces a este equipo o no existe ⚠️");
-          window.location.href = "/teamspage";
-          return;
-        }
-
-        setTeam(teamData);
-        console.log("Equipo actual:", teamData);
-
-        const taskData = await fetchTeamTasks(teamData.id);
-        setTasks(taskData);
-      } catch (err) {
-        console.error("Error inicializando BoardPage:", err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadAll();
-  }, [id]);
-
-  // Reutilizable para llamadas
-  const makeRequest = async (endpoint, method, body, customHeaders = {}) => {
-    setLoading(true);
-    setError(null);
-    setMessage(null);
-
+  // Cargar datos principales
+  const loadBoardData = async () => {
     try {
-      const response = await fetch(`http://localhost:3000${endpoint}`, {
-        method,
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          ...customHeaders,
-        },
-        body: body ? JSON.stringify(body) : undefined,
-      });
+      setLoading(true);
+      setError(null);
 
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.message || "Request failed");
+      // 1. Usuario
+      const userData = await getProfile();
+      setUser(userData);
+
+      // 2. Equipos del usuario
+      const teams = await getTeams();
+      const currentTeam = teams.find((t) => t.id === id);
+
+      if (!currentTeam) {
+        alert("No perteneces a este equipo o no existe ⚠️");
+        return navigate("/teamspage");
       }
 
-      const data = await response.json();
-      setMessage(data.message || "Operación exitosa");
-      return data;
+      setTeam(currentTeam);
+
+      // 3. Tareas
+      const taskList = await getTeamTasks(currentTeam.id);
+      setTasks(taskList);
+
     } catch (err) {
+      console.error("Error en BoardPage:", err);
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // Crear invitaciones de equipo a usuarios
+  useEffect(() => {
+    loadBoardData();
+  }, [id]);
+
+  // Invitar usuario al equipo
   const handleInviteUser = async (e) => {
     e.preventDefault();
-    if (!inviteUserId.trim()) return alert("Ingresa un ID de usuario válido");
+    if (!inviteUserId.trim()) return alert("Ingresa un ID válido");
 
-    const body = {
-      id_team: team.id,
-      id_user: inviteUserId.trim(),
-    };
-
-    const res = await makeRequest("/member/invite", "POST", body);
-    if (res) {
-      alert("✅ Invitación enviada correctamente");
+    try {
+      await inviteUser(team.id, inviteUserId.trim());
+      alert("Invitación enviada");
       setInviteUserId("");
+    } catch (err) {
+      alert("Error enviando invitación");
     }
   };
 
   // Crear tarea
   const handleAddTask = async (e) => {
     e.preventDefault();
-    const body = {
-      id_team: team.id,
-      id_responsible: user.user_id,
-      name: newTask.trim(),
-      priority: "low",
-      type: "business",
-      due_date: "2025-12-01",
-      status: "pending",
-    };
-    const updated = await makeRequest("/task", "POST", body);
-    if (updated) {
-      const refreshed = await fetchTeamTasks(team.id);
+    if (!newTask.trim()) return;
+
+    try {
+      await createTask({
+        id_team: team.id,
+        id_responsible: user.user_id,
+        name: newTask.trim(),
+        priority: "low",
+        type: "business",
+        due_date: "2025-12-01",
+        status: "pending",
+      });
+
+      const refreshed = await getTeamTasks(team.id);
       setTasks(refreshed);
+      setNewTask("");
+
+    } catch (err) {
+      alert("Error creando tarea");
     }
   };
 
-  // Cambiar estado
+  // Actualizar tarea (status, prioridad...)
   const handleTaskUpdate = async (taskId, updates) => {
     try {
       const currentTask = tasks.find((t) => t.id === taskId);
@@ -162,33 +124,32 @@ function BoardPage() {
         id_responsible: currentTask.id_responsible || user.user_id,
       };
 
-      if (updatedTask.due_date instanceof Date) {
-        updatedTask.due_date = updatedTask.due_date.toISOString();
-      }
+      await updateTask(taskId, updatedTask);
 
-      const updated = await makeRequest(`/task/${taskId}`, "PUT", updatedTask);
-      if (updated) {
-        const refreshed = await fetchTeamTasks(team.id);
-        setTasks(refreshed);
-      }
+      const refreshed = await getTeamTasks(team.id);
+      setTasks(refreshed);
+
     } catch (err) {
-      console.error("Error al actualizar tarea:", err);
-      setError("No se pudo actualizar la tarea.");
+      console.error(err);
+      setError("No se pudo actualizar la tarea");
     }
   };
 
-  // Eliminar tarea
+  // Borrar tarea
   const handleDeleteTask = async (taskId) => {
     if (!window.confirm("¿Eliminar esta tarea?")) return;
-    const deleted = await makeRequest(`/task/${taskId}`, "DELETE");
-    if (deleted) {
+
+    try {
+      await deleteTask(taskId);
       setTasks(tasks.filter((t) => t.id !== taskId));
+    } catch (err) {
+      alert("No se pudo eliminar la tarea");
     }
   };
 
-  // Cerrar sesión
+  // Logout
   const handleLogout = () => {
-    window.location.href = "/login";
+    signOut(navigate);
   };
 
   if (loading) return <p>Cargando...</p>;
@@ -243,7 +204,8 @@ function BoardPage() {
                   <p className="task-title">{t.name}</p>
                   <small>
                     🗓️ {new Date(t.due_date).toLocaleDateString()}
-                    <br />👤 {user?.user?.name}
+                    <br />
+                    👤 {user?.user?.name}
                   </small>
 
                   <div className="task-controls">

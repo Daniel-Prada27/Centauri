@@ -1,159 +1,174 @@
 import "../estilos/Login.css";
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import {
+  getTeams,
+  getProfile,
+  getTeamMembers,
+  updateTeam,
+  deleteTeam,
+  createTeam,
+  acceptInvite,
+  rejectInvite,
+  makeRequest,
+  signOut
+} from "../utils/api"
 
 function TeamsPage() {
   const [user, setUser] = useState(null);
+  const [teams, setTeams] = useState([]);
+
+  const [invitations, setInvitations] = useState([]);
+
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
-  const [teamName, setTeamName] = useState("");
-  const [teamDescription, setTeamDescription] = useState("");
-  const [joinCode, setJoinCode] = useState("");
-  const [teams, setTeams] = useState([]);
-  const [invitations, setInvitations] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [message, setMessage] = useState(null);
 
-  const makeRequest = async (endpoint, method, body, customHeaders = {}) => {
-    setLoading(true);
-    setError(null);
-    setMessage(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+  const [selectedTeam, setSelectedTeam] = useState(null);
+
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+
+  const navigate = useNavigate();
+
+  // Cargar los datos principales
+  const loadData = async () => {
     try {
-      const response = await fetch(`http://localhost:3000${endpoint}`, {
-        method,
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          ...customHeaders,
-        },
-        body: body ? JSON.stringify(body) : undefined,
-      });
+      const teamsList = await getTeams();
+      setTeams(teamsList);
 
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.message || "Request failed");
+      const userData = await getProfile();
+      setUser(userData);
+
+      if (!teamsList.length) {
+        setInvitations([]);
+        return;
       }
 
-      const data = await response.json();
-      setMessage(data.message || "Operación exitosa");
-      return data;
+      // Obtener miembros de todos los equipos en paralelo
+      const membersPerTeam = await Promise.all(
+        teamsList.map(t =>
+          getTeamMembers(t.id).then(members => ({ team: t, members }))
+        )
+      );
+
+      // Filtrar invitaciones pendientes
+      const pending = membersPerTeam
+        .filter(({ members }) =>
+          members.some(
+            m => m.id_user === userData.user_id && m.role === "pending"
+          )
+        )
+        .map(({ team }) => team);
+
+      setInvitations(pending);
     } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      console.error("Error cargando equipos:", err);
     }
   };
-
-  // Recibe la lista de equipos a los que pertenece el usuario
-    const loadData = async () => {
-      try {
-          const teamsData = await makeRequest("/team", "GET");
-          const teamsList = teamsData || [];
-          setTeams(teamsList);
-    
-          const userData = await makeRequest("/profile", "GET");
-          setUser(userData || []);
-
-          if (!userData || teamsList.length === 0) {
-            setInvitations([]);
-            return;
-          }
-
-          // llamar makeRequest en paralelo, machete
-          const memberPromises = teamsList.map((t) =>
-            makeRequest(`/member/${t.id}`, "GET").then((members) => ({ team: t, members }))
-          );
-
-          const membersPerTeam = await Promise.all(memberPromises);
-
-          const pendingTeams = membersPerTeam
-            .filter(Boolean)
-            .filter(({ team, members }) =>
-              Array.isArray(members) &&
-              members.some(
-                (m) => m.id_user === userData.user_id && m.role === "pending"
-              )
-            )
-            .map(({ team }) => team);
-
-          setInvitations(pendingTeams);
-
-        } catch (err) {
-          console.error("Error cargando datos:", err);
-        }
-    };
 
   useEffect(() => {
     loadData();
   }, []);
 
-  // Crear equipo (envía al backend)
+  // Crear equipo
   const handleCreateTeam = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:3000/team", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: teamName, description: teamDescription }),
+      const newTeam = await createTeam({
+        name: teamName,
+        description: teamDescription,
       });
 
-      const createdTeam = await res.json();
-      if (!res.ok) throw new Error("Error al crear el equipo");
-      alert("✅ Equipo creado correctamente");
-      window.location.href = `/boardpage/${createdTeam.id}`; 
-      setShowCreateModal(false);
-      setTeamName("");
-      setTeamDescription("");
-    } catch (error) {
-      alert("❌ " + error.message);
+      alert("Equipo creado");
+      navigate(`/boardpage/${newTeam.id}`);
+    } catch (err) {
+      alert("Error al crear equipo");
     }
   };
 
-// Aceptar invitación
-const handleAcceptInvite = async (teamId, userId) => {
-  try {
-    const res = await makeRequest("/member/invite/accept", "PUT", {
-      id_user: userId,
-      id_team: teamId,
-    });
+  // Unirse a equipo, falta por arreglar
+  const handleJoinTeam = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await makeRequest("/member/invite/join", "POST", {
+        id_team: joinCode,
+      });
 
-    if (res) {
-      alert("✅ Invitación aceptada correctamente");
-      await loadData(); // refrescar lista correctamente
-      window.location.href = `/boardpage/${teamId}`;
+      alert("Solicitud enviada");
+      setShowJoinModal(false);
+    } catch (err) {
+      alert("Error al unirse al equipo");
     }
-  } catch (err) {
-    console.error(err);
-    alert("❌ No se pudo aceptar la invitación");
-  }
-};
+  };
 
-// Rechazar invitación
-const handleRejectInvite = async (teamId, userId) => {
-  try {
-    const res = await makeRequest("/member/invite/reject", "PUT", {
-      id_user: userId,
-      id_team: teamId,
-    });
+  // Aceptar / Rechazar
+  const handleAcceptInvite = async (teamId) => {
+    await acceptInvite(teamId, user.user_id);
+    await loadData();
+    navigate(`/boardpage/${teamId}`);
+  };
 
-    if (res) {
-      alert("🚫 Invitación rechazada");
-      await loadData(); // refrescar lista correctamente
+  const handleRejectInvite = async (teamId) => {
+    await rejectInvite(teamId, user.user_id);
+    await loadData();
+  };
+
+  // Abrir el modal de editar
+  const handleOpenEdit = (team) => {
+    setSelectedTeam(team);
+    setEditName(team.name);
+    setEditDescription(team.description);
+    setShowEditModal(true);
+  };
+
+  // Abrir el modal de eliminar
+  const handleOpenDelete = (team) => {
+    setSelectedTeam(team);
+    setShowDeleteModal(true);
+  };
+
+  // Update team
+  const handleUpdateTeam = async (e) => {
+    e.preventDefault();
+
+    const data = {
+      name: editName,
+      description: editDescription,
+    };
+
+    try {
+      await updateTeam(selectedTeam.id, data);
+      setShowEditModal(false);
+      await loadData();
+      alert("Equipo actualizado correctamente");
+    } catch (err) {
+      alert("Error actualizando el equipo");
     }
-  } catch (err) {
-    console.error(err);
-    alert("Error al rechazar invitación");
-  }
-};
+  };
 
+  // Delete team
+  const handleDeleteTeam = async (e) => {
+    e.preventDefault();
+
+    try {
+      await deleteTeam(selectedTeam.id);
+      setShowDeleteModal(false);
+      await loadData();
+      alert("Equipo eliminado correctamente");
+    } catch (err) {
+      alert("Error eliminando equipo");
+    }
+  };
+
+  // Logout
   const handleLogout = () => {
-    // limpiar sesión o token
-    alert("👋 Sesión cerrada");
-    window.location.href = "/login";
+    signOut(navigate);
   };
-  
+
   return (
     <div className="login-container">
       <div className="login-card">
@@ -167,139 +182,225 @@ const handleRejectInvite = async (teamId, userId) => {
           🔗 Unirse a un equipo
         </button>
 
-        {/* 📩 INVITACIONES PENDIENTES */}
-        <div className="invitation-list" style={{ marginTop: "2rem" }}>
-          <h3>Invitaciones pendientes</h3>
-
-          {invitations.length === 0 ? (
-            <p>No tienes invitaciones pendientes.</p>
-          ) : (
-            <ul>
-              {invitations.map((inv) => (
-                <li key={inv.id} style={{ marginBottom: "1rem" }}>
-                  <strong>{inv.name}</strong>
-                  <div style={{ marginTop: "0.5rem", display: "flex", gap: "0.5rem" }}>
-                    <button
-                      className="btn-login"
-                      onClick={() => handleAcceptInvite(inv.id, user.user_id)}
-                    >
-                      ✅ Aceptar
-                    </button>
-                    <button
-                      className="btn-google"
-                      onClick={() => handleRejectInvite(inv.id, user.user_id)}
-                    >
-                      ❌ Rechazar
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-
-        <div className="divider">
-          <span></span>
-        </div>
-
-        {/* 🧾 Lista de equipos del usuario */}
-        <h3 style={{ marginTop: "15px", color: "#333" }}>Mis equipos</h3>
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          {teams.length > 0 ? (
-            teams.map((team) => (
-              <li key={team.id} style={{ margin: "8px 0" }}>
-                <button
-                  className="btn-login"
-                  style={{ width: "100%", backgroundColor: "#5e72e4" }}
-                  onClick={() => (window.location.href = `/boardpage/${team.id}`)}
-                >
-                  {team.name}
+        {/* INVITACIONES */}
+        <h3 style={{ marginTop: "2rem" }}>Invitaciones pendientes</h3>
+        {invitations.length === 0 ? (
+          <p>No tienes invitaciones pendientes.</p>
+        ) : (
+          invitations.map(inv => (
+            <div key={inv.id} style={{ margin: "1rem 0" }}>
+              <strong>{inv.name}</strong>
+              <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+                <button className="btn-login" onClick={() => handleAcceptInvite(inv.id)}>
+                  Aceptar
                 </button>
-              </li>
-            ))
-          ) : (
-            <p style={{ color: "#777" }}>No perteneces a ningún equipo todavía</p>
-          )}
-        </ul>
+                <button className="btn-google" onClick={() => handleRejectInvite(inv.id)}>
+                  Rechazar
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+
+        {/* LISTA DE EQUIPOS */}
+        <h3 style={{ marginTop: "1.5rem" }}>Mis equipos</h3>
+
+        {teams.length > 0 ? (
+          teams.map(team => (
+            <div
+              key={team.id}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "1rem",
+                marginTop: "0.5rem",
+              }}
+            >
+              <button
+                className="btn-login"
+                style={{ flex: 1, backgroundColor: "#5e72e4" }}
+                onClick={() => navigate(`/boardpage/${team.id}`)}
+              >
+                {team.name}
+              </button>
+
+              {/* BOTÓN EDITAR */}
+              <button
+                className="btn-login"
+                style={{ backgroundColor: "#f5a623" }}
+                onClick={() => {
+                  setSelectedTeam(team);
+                  setEditName(team.name);
+                  setEditDescription(team.description);
+                  setShowEditModal(true);
+                }}
+              >
+                ✏️
+              </button>
+
+              {/* BOTÓN ELIMINAR */}
+              <button
+                className="btn-google"
+                style={{ backgroundColor: "#ff4d4d" }}
+                onClick={() => {
+                  setSelectedTeam(team);
+                  setShowDeleteModal(true);
+                }}
+              >
+                🗑️
+              </button>
+            </div>
+          ))
+        ) : (
+          <p>No perteneces a ningún equipo</p>
+        )}
 
         <button
           className="btn-login"
-          style={{ backgroundColor: "#ff4d4d" }}
+          style={{ backgroundColor: "#ff4d4d", marginTop: "2rem" }}
           onClick={handleLogout}
         >
           🚪 Cerrar sesión
         </button>
-      </div>
+        </div>
 
-      {/* MODAL CREAR EQUIPO */}
-      {showCreateModal && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <h3>Crear nuevo equipo</h3>
-            <form onSubmit={handleCreateTeam}>
-              <div className="form-group">
-                <label>Nombre del equipo</label>
-                <input
-                  type="text"
-                  value={teamName}
-                  onChange={(e) => setTeamName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Descripción</label>
-                <input
-                  type="text"
-                  value={teamDescription}
-                  onChange={(e) => setTeamDescription(e.target.value)}
-                  required
-                />
-              </div>
-              <button className="btn-login" type="submit">
-                Crear
-              </button>
+        {/* MODAL CREAR EQUIPO */}
+        {showCreateModal && (
+          <div className="modal-overlay">
+            <div className="modal-card">
+              <h3>Crear nuevo equipo</h3>
+              <form onSubmit={handleCreateTeam}>
+                <div className="form-group">
+                  <label>Nombre del equipo</label>
+                  <input
+                    type="text"
+                    value={teamName}
+                    onChange={(e) => setTeamName(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Descripción</label>
+                  <input
+                    type="text"
+                    value={teamDescription}
+                    onChange={(e) => setTeamDescription(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <button className="btn-login" type="submit">
+                  Crear
+                </button>
+                <button
+                  type="button"
+                  className="btn-google"
+                  onClick={() => setShowCreateModal(false)}
+                >
+                  Cancelar
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL UNIRSE */}
+        {showJoinModal && (
+          <div className="modal-overlay">
+            <div className="modal-card">
+              <h3>Unirse a un equipo</h3>
+              <form onSubmit={handleJoinTeam}>
+                <div className="form-group">
+                  <label>ID del equipo</label>
+                  <input
+                    type="text"
+                    value={joinCode}
+                    onChange={(e) => setJoinCode(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <button className="btn-login" type="submit">Unirse</button>
+                <button
+                  type="button"
+                  className="btn-google"
+                  onClick={() => setShowJoinModal(false)}
+                >
+                  Cancelar
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL EDITAR EQUIPO */}
+        {showEditModal && (
+          <div className="modal-overlay">
+            <div className="modal-card">
+              <h3>Editar equipo</h3>
+              <form onSubmit={handleUpdateTeam}>
+                <div className="form-group">
+                  <label>Nombre</label>
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Descripción</label>
+                  <input
+                    type="text"
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <button className="btn-login" type="submit">Guardar cambios</button>
+                <button
+                  type="button"
+                  className="btn-google"
+                  onClick={() => setShowEditModal(false)}
+                >
+                  Cancelar
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL BORRAR EQUIPO */}
+        {showDeleteModal && (
+          <div className="modal-overlay">
+            <div className="modal-card">
+              <h3>¿Eliminar equipo?</h3>
+              <p style={{ marginBottom: "1rem" }}>
+                Esta acción no se puede deshacer.
+              </p>
+
               <button
-                type="button"
                 className="btn-google"
-                onClick={() => setShowCreateModal(false)}
+                style={{ backgroundColor: "#ff4d4d" }}
+                onClick={handleDeleteTeam}
+              >
+                Confirmar eliminación
+              </button>
+
+              <button
+                className="btn-login"
+                onClick={() => setShowDeleteModal(false)}
               >
                 Cancelar
               </button>
-            </form>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* MODAL UNIRSE A EQUIPO */}
-      {showJoinModal && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <h3>Unirse a un equipo</h3>
-            <form onSubmit={handleJoinTeam}>
-              <div className="form-group">
-                <label>ID del equipo</label>
-                <input
-                  type="text"
-                  value={joinCode}
-                  onChange={(e) => setJoinCode(e.target.value)}
-                  required
-                />
-              </div>
-              <button className="btn-login" type="submit">
-                Unirse
-              </button>
-              <button
-                type="button"
-                className="btn-google"
-                onClick={() => setShowJoinModal(false)}
-              >
-                Cancelar
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
