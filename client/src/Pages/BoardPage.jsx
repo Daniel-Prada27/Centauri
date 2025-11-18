@@ -4,16 +4,14 @@ import TeamsSidebar from "../Components/TeamsSidebar";
 import { useParams, useNavigate } from "react-router-dom";
 
 import {
-  makeRequest,
   signOut,
   getProfile,
   getTeams,
-  getTeamMembers,
   getTeamTasks,
   createTask,
   updateTask,
   deleteTask,
-  inviteUser
+  inviteUser,
 } from "../utils/api";
 
 function BoardPage() {
@@ -27,6 +25,9 @@ function BoardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // 👇 NUEVO: controlar la ventana del gestor de equipos
+  const [showTeamsManager, setShowTeamsManager] = useState(false);
+
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -36,17 +37,17 @@ function BoardPage() {
     { key: "completed", label: "Completado" },
   ];
 
-  // Cargar datos principales
+  // ===========================
+  //   Cargar datos del tablero
+  // ===========================
   const loadBoardData = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // 1. Usuario
       const userData = await getProfile();
       setUser(userData);
 
-      // 2. Equipos del usuario
       const teams = await getTeams();
       const currentTeam = teams.find((t) => t.id === id);
 
@@ -57,10 +58,8 @@ function BoardPage() {
 
       setTeam(currentTeam);
 
-      // 3. Tareas
       const taskList = await getTeamTasks(currentTeam.id);
       setTasks(taskList);
-
     } catch (err) {
       console.error("Error en BoardPage:", err);
       setError(err.message);
@@ -73,7 +72,9 @@ function BoardPage() {
     loadBoardData();
   }, [id]);
 
-  // Invitar usuario al equipo
+  // ===========================
+  //   Invitar usuario
+  // ===========================
   const handleInviteUser = async (e) => {
     e.preventDefault();
     if (!inviteUserId.trim()) return alert("Ingresa un ID válido");
@@ -87,7 +88,9 @@ function BoardPage() {
     }
   };
 
-  // Crear tarea
+  // ===========================
+  //   Crear tarea
+  // ===========================
   const handleAddTask = async (e) => {
     e.preventDefault();
     if (!newTask.trim()) return;
@@ -106,13 +109,14 @@ function BoardPage() {
       const refreshed = await getTeamTasks(team.id);
       setTasks(refreshed);
       setNewTask("");
-
     } catch (err) {
       alert("Error creando tarea");
     }
   };
 
-  // Actualizar tarea (status, prioridad...)
+  // ===========================
+  //   Actualizar tarea
+  // ===========================
   const handleTaskUpdate = async (taskId, updates) => {
     try {
       const currentTask = tasks.find((t) => t.id === taskId);
@@ -129,14 +133,15 @@ function BoardPage() {
 
       const refreshed = await getTeamTasks(team.id);
       setTasks(refreshed);
-
     } catch (err) {
       console.error(err);
       setError("No se pudo actualizar la tarea");
     }
   };
 
-  // Borrar tarea
+  // ===========================
+  //   Eliminar tarea
+  // ===========================
   const handleDeleteTask = async (taskId) => {
     if (!window.confirm("¿Eliminar esta tarea?")) return;
 
@@ -148,7 +153,9 @@ function BoardPage() {
     }
   };
 
-  // Logout
+  // ===========================
+  //   Cerrar sesión
+  // ===========================
   const handleLogout = () => {
     signOut(navigate);
   };
@@ -156,114 +163,140 @@ function BoardPage() {
   if (loading) return <p>Cargando...</p>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
+  // ===========================
+  //   RENDER
+  // ===========================
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
-    
-    {/* SIDEBAR DE EQUIPOS */}
-    <div className="teams-sidebar">
-      <TeamsSidebar />
-    </div>
-
-    {/* CONTENIDO DEL BOARDPAGE */}
-    <div style={{ flex: 1, overflow: "auto" }}>
-          <div className="board-container">
-      <div className="board-header">
-        <div>
-          <h2>{team?.name}</h2>
-          <p style={{ color: "#5e6c84" }}>
-            👤 {user?.user?.name} — {user?.user?.email}
-          </p>
-        </div>
-
-        <div className="invite-section">
-          <input
-            type="text"
-            placeholder="ID de usuario a invitar..."
-            value={inviteUserId}
-            onChange={(e) => setInviteUserId(e.target.value)}
-          />
-          <button onClick={handleInviteUser}>✉️ Enviar invitación</button>
-        </div>
-
-        <div className="header-actions">
-          <input
-            type="text"
-            placeholder="Nueva tarea..."
-            value={newTask}
-            onChange={(e) => setNewTask(e.target.value)}
-          />
-          <button onClick={handleAddTask}>➕ Crear tarea</button>
-          <button
-            style={{ backgroundColor: "#ff4d4d" }}
-            onClick={handleLogout}
-          >
-            🚪 Cerrar sesión
-          </button>
-        </div>
-      </div>
-
-      <div className="kanban-board">
-        {statuses.map((st) => (
-          <div key={st.key} className="kanban-column">
-            <h3>{st.label}</h3>
-
-            {tasks
-              .filter((t) => t.status === st.key)
-              .map((t) => (
-                <div key={t.id} className="kanban-card">
-                  <p className="task-title">{t.name}</p>
-                  <small>
-                    🗓️ {new Date(t.due_date).toLocaleDateString()}
-                    <br />
-                    👤 {user?.user?.name}
-                  </small>
-
-                  <div className="task-controls">
-                    <div className="dropdown-group">
-                      <label>Estado:</label>
-                      <select
-                        value={t.status}
-                        onChange={(e) =>
-                          handleTaskUpdate(t.id, { status: e.target.value })
-                        }
-                      >
-                        <option value="pending">Pendiente</option>
-                        <option value="in_progress">En progreso</option>
-                        <option value="completed">Completado</option>
-                      </select>
-                    </div>
-
-                    <div className="dropdown-group">
-                      <label>Prioridad:</label>
-                      <select
-                        value={t.priority}
-                        onChange={(e) =>
-                          handleTaskUpdate(t.id, { priority: e.target.value })
-                        }
-                      >
-                        <option value="low">Baja</option>
-                        <option value="medium">Media</option>
-                        <option value="high">Alta</option>
-                      </select>
-                    </div>
-
-                    <button
-                      className="mini-btn delete"
-                      onClick={() => handleDeleteTask(t.id)}
-                    >
-                      🗑️
-                    </button>
-                  </div>
-                </div>
-              ))}
+    <div className="board-page-root">
+      <div className="board-container">
+        {/* HEADER SUPERIOR */}
+        <div className="board-header">
+          <div className="board-header-info">
+            <h2>{team?.name}</h2>
+            <p>
+              👤 {user?.user?.name} — {user?.user?.email}
+            </p>
           </div>
-        ))}
+
+          <div className="invite-section">
+            <input
+              type="text"
+              placeholder="ID de usuario a invitar..."
+              value={inviteUserId}
+              onChange={(e) => setInviteUserId(e.target.value)}
+            />
+            <button onClick={handleInviteUser}>✉️ Enviar invitación</button>
+          </div>
+
+          <div className="header-actions">
+            <input
+              type="text"
+              placeholder="Nueva tarea..."
+              value={newTask}
+              onChange={(e) => setNewTask(e.target.value)}
+            />
+            <button className="add-task" onClick={handleAddTask}>
+              ➕ Crear tarea
+            </button>
+
+            {/* 👇 NUEVO: botón para abrir el gestor de equipos */}
+            <button
+              className="teams-manager-btn"
+              type="button"
+              onClick={() => setShowTeamsManager(true)}
+            >
+              👥 Gestor de equipos
+            </button>
+
+            <button className="logout" onClick={handleLogout}>
+              🚪 Cerrar sesión
+            </button>
+          </div>
+        </div>
+
+        {/* TABLERO KANBAN */}
+        <div className="kanban-board">
+          {statuses.map((st) => (
+            <div key={st.key} className="kanban-column">
+              <h3>{st.label}</h3>
+
+              {tasks
+                .filter((t) => t.status === st.key)
+                .map((t) => (
+                  <div key={t.id} className="kanban-card">
+                    <p className="task-title">{t.name}</p>
+                    <small>
+                      🗓️ {new Date(t.due_date).toLocaleDateString()}
+                      <br />
+                      👤 {user?.user?.name}
+                    </small>
+
+                    <div className="task-controls">
+                      <div className="dropdown-group">
+                        <label>Estado:</label>
+                        <select
+                          value={t.status}
+                          onChange={(e) =>
+                            handleTaskUpdate(t.id, { status: e.target.value })
+                          }
+                        >
+                          <option value="pending">Pendiente</option>
+                          <option value="in_progress">En progreso</option>
+                          <option value="completed">Completado</option>
+                        </select>
+                      </div>
+
+                      <div className="dropdown-group">
+                        <label>Prioridad:</label>
+                        <select
+                          value={t.priority}
+                          onChange={(e) =>
+                            handleTaskUpdate(t.id, { priority: e.target.value })
+                          }
+                        >
+                          <option value="low">Baja</option>
+                          <option value="medium">Media</option>
+                          <option value="high">Alta</option>
+                        </select>
+                      </div>
+
+                      <button
+                        className="mini-btn delete"
+                        onClick={() => handleDeleteTask(t.id)}
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
-    </div>
 
-    </div>
+      {/* MODAL DEL GESTOR DE EQUIPOS */}
+      {showTeamsManager && (
+        <div
+          className="teams-manager-overlay"
+          onClick={() => setShowTeamsManager(false)}
+        >
+          <div
+            className="teams-manager-dialog"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="teams-manager-close"
+              onClick={() => setShowTeamsManager(false)}
+            >
+              ✕
+            </button>
 
+            {/* Aquí dentro se muestra el mismo contenido que antes estaba a la izquierda */}
+            <TeamsSidebar />
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 

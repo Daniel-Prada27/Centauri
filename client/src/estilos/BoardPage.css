@@ -1,305 +1,268 @@
-/* Login.css - Estilo tipo Atlassian */
+/* ========================= */
+/*   TEMA JIRA PROFESIONAL   */
+/* ========================= */
 
-.login-container {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa , #9fbde6, #6896c4);
-  display: flex;
-  height: 100vh;
-  width: 100vw;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-}
+/* Paleta Atlassian:
+   Azul Jira: #0052CC
+   Azul Hover: #0065FF
+   Neutro claro: #F4F5F7
+   Neutro medio: #DFE1E6
+   Gris texto: #172B4D
+*/
 
-.login-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  padding: 40px 32px;
-  width: 100%;
-  max-width: 400px;
-  text-align: center;
-  transition: transform 0.2s ease;
-}
-
-.login-card:hover {
-  transform: translateY(-2px);
-}
-
-.login-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: #172b4d;
-  margin: 0 0 24px 0;
-}
-
-.form-group {
-  margin-bottom: 16px;
-  text-align: left;
-}
-
-.form-group label {
-  display: block;
-  font-size: 14px;
-  font-weight: 500;
-  color: #172b4d;
-  margin-bottom: 6px;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 10px 12px;
-  font-size: 14px;
-  border: 1px solid #dfe1e6;
-  border-radius: 6px;
-  background-color: #fafbfc;
-  transition: all 0.2s ease;
+* {
+  font-family: "Inter", "Segoe UI", "Roboto", sans-serif;
   box-sizing: border-box;
 }
 
-.form-group input:focus {
-  outline: none;
-  border-color: #0052cc;
-  background-color: white;
-  box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.2);
-}
-
-.btn-login {
-  width: 100%;
-  padding: 10px;
-  font-size: 14px;
-  font-weight: 600;
-  color: white;
-  background-color: #0052cc;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-top: 8px;
-  transition: background-color 0.2s ease;
-}
-
-.btn-login:hover {
-  background-color: #003ead;
-}
-
-.divider {
-  margin: 24px 0;
-  color: #5e6c84;
-  font-size: 14px;
-  position: relative;
-}
-
-.divider::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: #dfe1e6;
-  z-index: 0;
-}
-
-.divider span {
-  background: white;
-  padding: 0 12px;
-  position: relative;
-  z-index: 1;
-}
-
-.btn-google {
-  width: 100%;
-  padding: 10px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #172b4d;
-  background-color: white;
-  border: 1px solid #dfe1e6;
-  border-radius: 6px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: all 0.2s ease;
-  margin-bottom: 24px;
-}
-
-.btn-google:hover {
-  background-color: #f4f5f7;
-  border-color: #c1c7d0;
-}
-
-.google-icon {
-  font-size: 18px;
-  color: #4285f4;
-}
-
-.register-link {
-  font-size: 14px;
-  color: #5e6c84;
-  margin: 0;
-}
-
-.register-link .link {
-  color: #0052cc;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.register-link .link:hover {
-  text-decoration: underline;
-}
-
-/* Modal overlay */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-}
-
-/* Modal card */
-.modal-card {
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  padding: 30px;
-  width: 100%;
-  max-width: 380px;
-  text-align: left;
-  animation: fadeIn 0.2s ease;
-}
-
-.modal-card h3 {
-  text-align: center;
-  margin-bottom: 20px;
-  color: #172b4d;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* Responsive */
-@media (max-width: 480px) {
-  .login-card {
-    padding: 32px 24px;
-  }
-}
-
-/* ==== Kanban Board ==== */
-
-.board-container {
+/* Fondo general estilo Jira */
+.board-page-root {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa, #9fbde6, #6896c4);
-  padding: 30px;
-  color: #172b4d;
-  font-family: 'Segoe UI', sans-serif;
+  width: 100%;
+  background: #F4F5F7;
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
 }
+
+/* Contenedor centrado */
+.board-container {
+  width: 100%;
+  max-width: 1400px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+  margin: 0 auto;
+}
+
+/* ========================= */
+/*         HEADER            */
+/* ========================= */
 
 .board-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  justify-content: space-between;
+  background: white;
+  padding: 12px 18px;
+  border-radius: 8px;
+  border: 1px solid #DFE1E6;
+  box-shadow: 0 1px 2px rgba(9,30,66,0.15);
 }
 
+.board-header-info h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #172B4D;
+  font-weight: 700;
+}
+
+	board-header-info p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #42526E;
+}
+
+.invite-section,
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
+/* Inputs Jira */
+.invite-section input,
 .header-actions input {
-  padding: 8px 10px;
-  border-radius: 6px;
-  border: 1px solid #dfe1e6;
+  padding: 6px 10px;
+  border: 1px solid #DFE1E6;
+  border-radius: 4px;
+  background: white;
+  font-size: 0.9rem;
+  color: #172B4D;
+  transition: border 0.2s;
+}
+
+.invite-section input:focus,
+.header-actions input:focus {
+  border-color: #0052CC;
+  box-shadow: 0 0 0 2px rgba(0,82,204,0.2);
   outline: none;
 }
 
-.kanban-board {
-  display: flex;
-  gap: 20px;
-  justify-content: space-around;
-  flex-wrap: wrap;
+/* Botones Jira */
+.invite-section button,
+.header-actions button {
+  padding: 6px 14px;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border 0.2s;
+  border: none;
 }
 
+/* Botón enviar */
+.invite-section button {
+  background: #0052CC;
+  color: white;
+}
+.invite-section button:hover {
+  background: #0065FF;
+}
+
+/* Crear tarea */
+.header-actions .add-task {
+  background: #36B37E;
+  color: white;
+}
+.header-actions .add-task:hover {
+  background: #2e9b6c;
+}
+
+/* Gestor equipos */
+.header-actions .teams-manager-btn {
+  background: white;
+  border: 1px solid #0052CC;
+  color: #0052CC;
+}
+.header-actions .teams-manager-btn:hover {
+  background: #F0F7FF;
+}
+
+/* Logout */
+.header-actions .logout {
+  background: #DE350B;
+  color: white;
+}
+.header-actions .logout:hover {
+  background: #BF2600;
+}
+
+/* ========================= */
+/*    TABLERO (KANBAN)      */
+/* ========================= */
+
+.kanban-board {
+  display: flex;
+  justify-content: center;
+  gap: 1.8rem;
+}
+
+/* Columnas Jira */
+
 .kanban-column {
-  background: #f4f5f7;
-  border-radius: 10px;
-  padding: 15px;
-  width: 300px;
-  min-height: 300px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 340px;
+  min-height: 500px;
+  background: #F4F5F7;
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid #DFE1E6;
 }
 
 .kanban-column h3 {
   text-align: center;
-  color: #0052cc;
-  margin-bottom: 10px;
+  color: #0052CC;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
 }
+
+/* ========================= */
+/*       TARJETAS            */
+/* ========================= */
 
 .kanban-card {
   background: white;
-  border-radius: 8px;
-  padding: 10px;
-  margin-bottom: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-
-.kanban-card p {
-  margin: 0 0 8px 0;
-}
-
-.task-buttons {
-  display: flex;
-  gap: 5px;
-}
-
-.kanban-card select {
-  width: 100%;
-  margin-bottom: 8px;
   border-radius: 6px;
-  border: 1px solid #dfe1e6;
-  padding: 6px;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #DFE1E6;
+  box-shadow: 0 1px 2px rgba(9,30,66,0.15);
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.kanban-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(9,30,66,0.20);
 }
 
 .task-title {
+  font-size: 0.95rem;
   font-weight: 600;
-  color: #172b4d;
+  color: #172B4D;
   margin-bottom: 6px;
 }
 
-.kanban-card small {
-  font-size: 12px;
-  color: #5e6c84;
-  display: block;
-  margin-bottom: 8px;
-  line-height: 1.2;
+/* Selects Jira */
+.dropdown-group select {
+  width: 100%;
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid #DFE1E6;
+  font-size: 0.85rem;
+  background: white;
 }
 
-.modal-card input {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #dfe1e6;
-  border-radius: 6px;
-  margin-bottom: 12px;
+.dropdown-group label {
+  color: #42526E;
+  font-weight: 600;
+  font-size: 0.75rem;
 }
 
-.modal-card button {
-  width: 100%;
+/* Botón eliminar */
+.mini-btn.delete {
+  background: #DE350B;
+  color: white;
+  padding: 6px;
+  border-radius: 4px;
+  font-weight: 700;
   margin-top: 8px;
+  cursor: pointer;
+  text-align: center;
+}
+.mini-btn.delete:hover {
+  background: #BF2600;
 }
 
+/* ========================= */
+/*  MODAL GESTOR DE EQUIPOS  */
+/* ========================= */
+
+.teams-manager-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+}
+
+.teams-manager-dialog {
+  width: 360px;
+  max-height: 90vh;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #DFE1E6;
+  box-shadow: 0px 4px 20px rgba(9,30,66,0.25);
+  animation: fadeInScale 0.18s ease;
+}
+
+.teams-manager-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: #F4F5F7;
+  border: 1px solid #DFE1E6;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* Animación modal */
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
