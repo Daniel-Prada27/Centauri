@@ -7,6 +7,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   signOut,
   getProfile,
+  getUserProfile,
   getTeamMembers,
   getTeams,
   getTeamTasks,
@@ -21,23 +22,23 @@ function BoardPage() {
   const [team, setTeam] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [members, setMembers] = useState([]);
+  const [profilesCache, setProfilesCache] = useState({});
 
   const [inviteUserId, setInviteUserId] = useState("");
-  const [newTask, setNewTask] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [showMembersModal, setShowMembersModal] = useState(false);
-
+  // controlar la ventana del creador de tareas
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [taskName, setTaskName] = useState("");
   const [taskType, setTaskType] = useState("business");
   const [taskResponsible, setTaskResponsible] = useState("");
-
   const [taskDueDate, setTaskDueDate] = useState("");
 
-  // 👇 NUEVO: controlar la ventana del gestor de equipos
+  // controlar la ventana del gestor de miembros
+  const [showMembersModal, setShowMembersModal] = useState(false);
+  // controlar la ventana del gestor de equipos
   const [showTeamsManager, setShowTeamsManager] = useState(false);
 
   const { id } = useParams();
@@ -58,7 +59,14 @@ function BoardPage() {
       setError(null);
 
       const userData = await getProfile();
-      setUser(userData);
+      setUser({
+        id: userData.user_id,
+        name: userData.user?.name,
+        email: userData.user?.email,
+        picture: userData.picture,
+        occupation: userData.occupation,
+        location: userData.location,
+      });
 
       const teams = await getTeams();
       const currentTeam = teams.find((t) => t.id === id);
@@ -70,8 +78,43 @@ function BoardPage() {
 
       setTeam(currentTeam);
 
-      const teamMembers = await getTeamMembers(currentTeam.id);
-      setMembers(teamMembers);
+      // miembros (id_user, role, id_team)
+      const rawMembers = await getTeamMembers(currentTeam.id);
+
+      // Para no realizar requests duplicados a /profile/:id, usamos cache local
+      const cache = { ...profilesCache };
+
+      const membersWithProfiles = await Promise.all(
+        rawMembers.map(async (m) => {
+          const uid = m.id_user;
+          if (!cache[uid]) {
+            try {
+              const profile = await getUserProfile(uid);
+              cache[uid] = profile;
+            } catch (err) {
+              // Si falla obtener perfil, guardamos un placeholder
+              console.warn("No se pudo cargar perfil para", uid, err);
+              cache[uid] = {
+                user_id: uid,
+                user: { name: "Usuario desconocido", email: "" },
+                picture: null,
+              };
+            }
+          }
+
+          const profile = cache[uid];
+          return {
+            ...m,
+            name: profile?.user?.name || "Usuario desconocido",
+            email: profile?.user?.email || "",
+            picture: profile?.picture || null,
+          };
+        })
+      );
+
+      // Actualizamos cache y members
+      setProfilesCache(cache);
+      setMembers(membersWithProfiles);
 
       const taskList = await getTeamTasks(currentTeam.id);
       setTasks(taskList);
@@ -109,7 +152,7 @@ function BoardPage() {
   const handleAddTask = async (e) => {
     if (e) e.preventDefault();
 
-    if (!taskName.trim() || !taskResponsible.trim()) {
+    if (!taskName.trim() || !taskResponsible.trim() || !taskDueDate) {
       alert("Debes completar todos los campos.");
       return;
     }
@@ -189,6 +232,14 @@ function BoardPage() {
   if (loading) return <p>Cargando...</p>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
+  //ayuda para conseguir el nombre de forma sencilla
+  const getResponsibleName = (userId) => {
+    if (!userId) return "Sin responsable";
+    if (profilesCache[userId]?.user?.name) return profilesCache[userId].user.name;
+    const m = members.find((x) => x.id_user === userId);
+    return m?.name || "Sin responsable";
+  };
+
   // ===========================
   //   RENDER
   // ===========================
@@ -200,7 +251,7 @@ function BoardPage() {
           <div className="board-header-info">
             <h2>{team?.name}</h2>
             <p>
-              👤 {user?.user?.name} — {user?.user?.email}
+              👤 {user?.name} — {user?.email}
             </p>
           </div>
 
@@ -252,7 +303,7 @@ function BoardPage() {
                     <small>
                       🗓️ {new Date(t.due_date).toLocaleDateString()}
                       <br />
-                      👤 {members.find(m => m.id_user === t.id_responsible)?.id_user}
+                      👤 {getResponsibleName(t.id_responsible)}
                     </small>
 
                     <div className="task-controls">
@@ -374,7 +425,11 @@ function BoardPage() {
         <MembersManagerModal
           teamId={team.id}
           initialMembers={members}
-          onClose={() => setShowMembersModal(false)}
+          onClose={async () => {
+            setShowMembersModal(false);
+            // refrescar miembros y tareas por si hubo cambios de rol
+            await loadBoardData();
+          }}
         />
       )}
 

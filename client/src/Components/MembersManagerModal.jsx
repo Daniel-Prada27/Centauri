@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { updateMemberRole } from "../utils/api";
-import { getProfile } from "../utils/api";
+import { getUserProfile } from "../utils/api";
 import "../estilos/TeamsPage.css";
 
 export default function MembersManagerModal({ teamId, onClose, initialMembers }) {
@@ -13,7 +13,7 @@ export default function MembersManagerModal({ teamId, onClose, initialMembers })
       try {
         const withNames = await Promise.all(
           initialMembers.map(async (m) => {
-            const profile = await getProfile(m.id_user);
+            const profile = await getUserProfile(m.id_user);
             return {
               ...m,
               name: profile.user.name,
@@ -76,7 +76,6 @@ export default function MembersManagerModal({ teamId, onClose, initialMembers })
             <div>
               <p className="font-medium">{member.name}</p>
               <p className="text-sm text-gray-500">{member.email}</p>
-              <p className="text-sm text-gray-500">{member.id_user}</p>
             </div>
 
             <select
@@ -88,6 +87,7 @@ export default function MembersManagerModal({ teamId, onClose, initialMembers })
               }
             >
               <option value="admin">Admin</option>
+              <option value="leader">Leader</option>
               <option value="operator">Operador</option>
               <option value="viewer">Viewer</option>
             </select>

@@ -10,6 +10,9 @@ userProfileRouter.post('',
     SchemaValidation.validateUserProfile,
     controller.addUserProfile);
 
+userProfileRouter.get('/:id',
+    ValidateSession.validateSession,
+    controller.readUserProfileById);
 // Maybe change to /profile/:id ??
 userProfileRouter.get('',
     ValidateSession.validateSession,

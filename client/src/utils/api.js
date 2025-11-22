@@ -50,6 +50,9 @@ export const signOut = async (navigate) => {
 export const getProfile = () =>
   makeRequest("/profile", "GET");
 
+export const getUserProfile = (userId) =>
+  makeRequest(`/profile/${userId}`, "GET");
+
 // ======================================================
 //  TEAMS
 // ======================================================
