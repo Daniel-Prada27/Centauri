@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import "../estilos/BoardPage.css";
 import TeamsSidebar from "../Components/TeamsSidebar";
+import MembersManagerModal from "../Components/MembersManagerModal";
 import { useParams, useNavigate } from "react-router-dom";
 
 import {
   signOut,
   getProfile,
+  getTeamMembers,
   getTeams,
   getTeamTasks,
   createTask,
@@ -18,12 +20,22 @@ function BoardPage() {
   const [user, setUser] = useState(null);
   const [team, setTeam] = useState(null);
   const [tasks, setTasks] = useState([]);
+  const [members, setMembers] = useState([]);
 
   const [inviteUserId, setInviteUserId] = useState("");
   const [newTask, setNewTask] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [showMembersModal, setShowMembersModal] = useState(false);
+
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [taskName, setTaskName] = useState("");
+  const [taskType, setTaskType] = useState("business");
+  const [taskResponsible, setTaskResponsible] = useState("");
+
+  const [taskDueDate, setTaskDueDate] = useState("");
 
   // 👇 NUEVO: controlar la ventana del gestor de equipos
   const [showTeamsManager, setShowTeamsManager] = useState(false);
@@ -57,6 +69,9 @@ function BoardPage() {
       }
 
       setTeam(currentTeam);
+
+      const teamMembers = await getTeamMembers(currentTeam.id);
+      setMembers(teamMembers);
 
       const taskList = await getTeamTasks(currentTeam.id);
       setTasks(taskList);
@@ -92,27 +107,38 @@ function BoardPage() {
   //   Crear tarea
   // ===========================
   const handleAddTask = async (e) => {
-    e.preventDefault();
-    if (!newTask.trim()) return;
+    if (e) e.preventDefault();
+
+    if (!taskName.trim() || !taskResponsible.trim()) {
+      alert("Debes completar todos los campos.");
+      return;
+    }
 
     try {
       await createTask({
         id_team: team.id,
-        id_responsible: user.user_id,
-        name: newTask.trim(),
+        id_responsible: taskResponsible,
+        name: taskName.trim(),
         priority: "low",
-        type: "business",
-        due_date: "2025-12-01",
+        type: taskType,
+        due_date: taskDueDate,
         status: "pending",
       });
 
       const refreshed = await getTeamTasks(team.id);
       setTasks(refreshed);
-      setNewTask("");
+
+      // limpiar
+      setTaskName("");
+      setTaskType("business");
+      setTaskResponsible("");
+      setShowCreateForm(false);
     } catch (err) {
+      console.log(err);
       alert("Error creando tarea");
     }
   };
+
 
   // ===========================
   //   Actualizar tarea
@@ -189,14 +215,12 @@ function BoardPage() {
           </div>
 
           <div className="header-actions">
-            <input
-              type="text"
-              placeholder="Nueva tarea..."
-              value={newTask}
-              onChange={(e) => setNewTask(e.target.value)}
-            />
-            <button className="add-task" onClick={handleAddTask}>
+            <button className="add-task" onClick={() => setShowCreateForm(true)}>
               ➕ Crear tarea
+            </button>
+
+            <button onClick={() => setShowMembersModal(true)}>
+              Gestionar Miembros
             </button>
 
             {/* 👇 NUEVO: botón para abrir el gestor de equipos */}
@@ -228,7 +252,7 @@ function BoardPage() {
                     <small>
                       🗓️ {new Date(t.due_date).toLocaleDateString()}
                       <br />
-                      👤 {user?.user?.name}
+                      👤 {members.find(m => m.id_user === t.id_responsible)?.id_user}
                     </small>
 
                     <div className="task-controls">
@@ -274,6 +298,55 @@ function BoardPage() {
         </div>
       </div>
 
+      {showCreateForm && (
+      <div className="modal-overlay">
+        <div className="modal">
+          <h3>Crear nueva tarea</h3>
+
+          <label>Nombre de la tarea</label>
+          <input
+            type="text"
+            value={taskName}
+            onChange={(e) => setTaskName(e.target.value)}
+            placeholder="Escribe el nombre..."
+          />
+
+          <label>Tipo de tarea</label>
+          <select value={taskType} onChange={(e) => setTaskType(e.target.value)}>
+            <option value="business">Business</option>
+            <option value="technical">Technical</option>
+            <option value="design">Design</option>
+            <option value="research">Research</option>
+          </select>
+
+          <label>Responsable</label>
+          <select
+            value={taskResponsible}
+            onChange={(e) => setTaskResponsible(e.target.value)}
+          >
+            <option value="">Seleccionar...</option>
+            {members.map((m) => (
+              <option key={m.id_user} value={m.id_user}>
+                {m.name}
+              </option>
+            ))}
+          </select>
+
+          <label>Fecha de vencimiento</label>
+          <input
+            type="date"
+            value={taskDueDate}
+            onChange={(e) => setTaskDueDate(e.target.value)}
+          />
+
+          <div className="modal-actions">
+            <button onClick={handleAddTask}>Crear</button>
+            <button onClick={() => setShowCreateForm(false)}>Cancelar</button>
+          </div>
+        </div>
+      </div>
+    )}
+
       {/* MODAL DEL GESTOR DE EQUIPOS */}
       {showTeamsManager && (
         <div
@@ -296,6 +369,16 @@ function BoardPage() {
           </div>
         </div>
       )}
+
+      {showMembersModal && (
+        <MembersManagerModal
+          teamId={team.id}
+          initialMembers={members}
+          onClose={() => setShowMembersModal(false)}
+        />
+      )}
+
+
     </div>
   );
 }

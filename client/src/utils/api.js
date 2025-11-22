@@ -93,6 +93,13 @@ export const rejectInvite = (teamId, userId) =>
     id_user: userId
   });
 
+export const updateMemberRole = (userId, teamId, role) =>
+  makeRequest("/member", "PUT", {
+    id_user: userId,
+    id_team: teamId,
+    role,
+  });
+
 // Solicitar unirse mediante código
 export const joinTeam = (teamId) =>
   makeRequest("/member/invite/join", "POST", {
