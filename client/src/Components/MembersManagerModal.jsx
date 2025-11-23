@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { updateMemberRole } from "../utils/api";
-import { getUserProfile } from "../utils/api";
+import { updateMemberRole, getUserProfile, getTeamMembers } from "../utils/api";
 import "../estilos/MembersManagerModal.css";
 
 export default function MembersManagerModal({ teamId, onClose, initialMembers }) {
@@ -8,40 +7,37 @@ export default function MembersManagerModal({ teamId, onClose, initialMembers })
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(null); // id_user que se está guardando
 
+  const reloadMembers = async () => {
+    try {
+      const freshMembers = await getTeamMembers(teamId);
+
+      const withNames = await Promise.all(
+        freshMembers.map(async (m) => {
+          const profile = await getUserProfile(m.id_user);
+          return {
+            ...m,
+            name: profile.user.name,
+            email: profile.user.email,
+            picture: profile.picture,
+          };
+        })
+      );
+
+      setMembers(withNames);
+    } catch (err) {
+      console.error("Error recargando miembros:", err);
+    }
+  };
+
   useEffect(() => {
-    const load = async () => {
-      try {
-        const withNames = await Promise.all(
-          initialMembers.map(async (m) => {
-            const profile = await getUserProfile(m.id_user);
-            return {
-              ...m,
-              name: profile.user.name,
-              email: profile.user.email,
-              picture: profile.picture,
-            };
-          })
-        );
-        setMembers(withNames);
-      } catch (err) {
-        console.error("Error cargando miembros:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [initialMembers]);
+    reloadMembers().finally(() => setLoading(false));
+  }, [teamId]);
 
   const handleRoleChange = async (member, newRole) => {
     setSaving(member.id_user);
     try {
-      const updated = await updateMemberRole(member.id_user, teamId, newRole);
-
-      setMembers((prev) =>
-        prev.map((m) =>
-          m.id_user === member.id_user ? { ...m, role: updated.role } : m
-        )
-      );
+      await updateMemberRole(member.id_user, teamId, newRole);
+      await reloadMembers();
     } catch (err) {
       console.error("Error actualizando rol:", err);
       alert("Error al actualizar el rol");
