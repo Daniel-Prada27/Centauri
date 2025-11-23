@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "../estilos/BoardPage.css";
 import TeamsSidebar from "../Components/TeamsSidebar";
 import MembersManagerModal from "../Components/MembersManagerModal";
+import NotificationsPanel from "../Components/NotificationsPanel"; // 👈 nuevo import
 import { useParams, useNavigate } from "react-router-dom";
 
 import {
@@ -25,21 +26,20 @@ function BoardPage() {
   const [profilesCache, setProfilesCache] = useState({});
 
   const [inviteUserId, setInviteUserId] = useState("");
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // controlar la ventana del creador de tareas
+  // Estados de modales
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showMembersModal, setShowMembersModal] = useState(false);
+  const [showTeamsManager, setShowTeamsManager] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false); // 👈 nuevo estado
+
+  // Estados del formulario de tarea
   const [taskName, setTaskName] = useState("");
   const [taskType, setTaskType] = useState("business");
   const [taskResponsible, setTaskResponsible] = useState("");
   const [taskDueDate, setTaskDueDate] = useState("");
-
-  // controlar la ventana del gestor de miembros
-  const [showMembersModal, setShowMembersModal] = useState(false);
-  // controlar la ventana del gestor de equipos
-  const [showTeamsManager, setShowTeamsManager] = useState(false);
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -78,12 +78,9 @@ function BoardPage() {
 
       setTeam(currentTeam);
 
-      // miembros (id_user, role, id_team)
       const rawMembers = await getTeamMembers(currentTeam.id);
 
-      // Para no realizar requests duplicados a /profile/:id, usamos cache local
       const cache = { ...profilesCache };
-
       const membersWithProfiles = await Promise.all(
         rawMembers.map(async (m) => {
           const uid = m.id_user;
@@ -92,7 +89,6 @@ function BoardPage() {
               const profile = await getUserProfile(uid);
               cache[uid] = profile;
             } catch (err) {
-              // Si falla obtener perfil, guardamos un placeholder
               console.warn("No se pudo cargar perfil para", uid, err);
               cache[uid] = {
                 user_id: uid,
@@ -112,7 +108,6 @@ function BoardPage() {
         })
       );
 
-      // Actualizamos cache y members
       setProfilesCache(cache);
       setMembers(membersWithProfiles);
 
@@ -171,7 +166,6 @@ function BoardPage() {
       const refreshed = await getTeamTasks(team.id);
       setTasks(refreshed);
 
-      // limpiar
       setTaskName("");
       setTaskType("business");
       setTaskResponsible("");
@@ -181,7 +175,6 @@ function BoardPage() {
       alert("Error creando tarea");
     }
   };
-
 
   // ===========================
   //   Actualizar tarea
@@ -232,7 +225,6 @@ function BoardPage() {
   if (loading) return <p>Cargando...</p>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
-  //ayuda para conseguir el nombre de forma sencilla
   const getResponsibleName = (userId) => {
     if (!userId) return "Sin responsable";
     if (profilesCache[userId]?.user?.name) return profilesCache[userId].user.name;
@@ -250,9 +242,7 @@ function BoardPage() {
         <div className="board-header">
           <div className="board-header-info">
             <h2>{team?.name}</h2>
-            <p>
-              👤 {user?.name} — {user?.email}
-            </p>
+            <p>👤 {user?.name}</p>
           </div>
 
           <div className="invite-section">
@@ -266,25 +256,34 @@ function BoardPage() {
           </div>
 
           <div className="header-actions">
+            {/* 🔔 Notificaciones */}
+            <button onClick={() => setShowNotifications(!showNotifications)}>
+              🔔 
+            </button>
+            {showNotifications && (<NotificationsPanel onClose={() => setShowNotifications(false)} />)}
+
             <button className="add-task" onClick={() => setShowCreateForm(true)}>
-              ➕ Crear tarea
+               Crear tarea
             </button>
 
             <button onClick={() => setShowMembersModal(true)}>
               Gestionar Miembros
             </button>
 
-            {/* 👇 NUEVO: botón para abrir el gestor de equipos */}
             <button
               className="teams-manager-btn"
               type="button"
               onClick={() => setShowTeamsManager(true)}
             >
-              👥 Gestor de equipos
+               Gestor de equipos
+            </button>
+
+            <button className="profile-btn" onClick={() => navigate("/profile")}>
+              👤 Mi perfil
             </button>
 
             <button className="logout" onClick={handleLogout}>
-              🚪 Cerrar sesión
+               Cerrar sesión
             </button>
           </div>
         </div>
@@ -294,7 +293,6 @@ function BoardPage() {
           {statuses.map((st) => (
             <div key={st.key} className="kanban-column">
               <h3>{st.label}</h3>
-
               {tasks
                 .filter((t) => t.status === st.key)
                 .map((t) => (
@@ -349,56 +347,56 @@ function BoardPage() {
         </div>
       </div>
 
+      {/* MODAL CREAR TAREA */}
       {showCreateForm && (
-      <div className="modal-overlay">
-        <div className="modal">
-          <h3>Crear nueva tarea</h3>
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>Crear nueva tarea</h3>
+            <label>Nombre de la tarea</label>
+            <input
+              type="text"
+              value={taskName}
+              onChange={(e) => setTaskName(e.target.value)}
+              placeholder="Escribe el nombre..."
+            />
 
-          <label>Nombre de la tarea</label>
-          <input
-            type="text"
-            value={taskName}
-            onChange={(e) => setTaskName(e.target.value)}
-            placeholder="Escribe el nombre..."
-          />
+            <label>Tipo de tarea</label>
+            <select value={taskType} onChange={(e) => setTaskType(e.target.value)}>
+              <option value="business">Business</option>
+              <option value="technical">Technical</option>
+              <option value="design">Design</option>
+              <option value="research">Research</option>
+            </select>
 
-          <label>Tipo de tarea</label>
-          <select value={taskType} onChange={(e) => setTaskType(e.target.value)}>
-            <option value="business">Business</option>
-            <option value="technical">Technical</option>
-            <option value="design">Design</option>
-            <option value="research">Research</option>
-          </select>
+            <label>Responsable</label>
+            <select
+              value={taskResponsible}
+              onChange={(e) => setTaskResponsible(e.target.value)}
+            >
+              <option value="">Seleccionar...</option>
+              {members.map((m) => (
+                <option key={m.id_user} value={m.id_user}>
+                  {m.name}
+                </option>
+              ))}
+            </select>
 
-          <label>Responsable</label>
-          <select
-            value={taskResponsible}
-            onChange={(e) => setTaskResponsible(e.target.value)}
-          >
-            <option value="">Seleccionar...</option>
-            {members.map((m) => (
-              <option key={m.id_user} value={m.id_user}>
-                {m.name}
-              </option>
-            ))}
-          </select>
+            <label>Fecha de vencimiento</label>
+            <input
+              type="date"
+              value={taskDueDate}
+              onChange={(e) => setTaskDueDate(e.target.value)}
+            />
 
-          <label>Fecha de vencimiento</label>
-          <input
-            type="date"
-            value={taskDueDate}
-            onChange={(e) => setTaskDueDate(e.target.value)}
-          />
-
-          <div className="modal-actions">
-            <button onClick={handleAddTask}>Crear</button>
-            <button onClick={() => setShowCreateForm(false)}>Cancelar</button>
+            <div className="modal-actions">
+              <button onClick={handleAddTask}>Crear</button>
+              <button onClick={() => setShowCreateForm(false)}>Cancelar</button>
+            </div>
           </div>
         </div>
-      </div>
-    )}
+      )}
 
-      {/* MODAL DEL GESTOR DE EQUIPOS */}
+      {/* MODAL GESTOR DE EQUIPOS */}
       {showTeamsManager && (
         <div
           className="teams-manager-overlay"
@@ -414,8 +412,6 @@ function BoardPage() {
             >
               ✕
             </button>
-
-            {/* Aquí dentro se muestra el mismo contenido que antes estaba a la izquierda */}
             <TeamsSidebar />
           </div>
         </div>
@@ -427,13 +423,10 @@ function BoardPage() {
           initialMembers={members}
           onClose={async () => {
             setShowMembersModal(false);
-            // refrescar miembros y tareas por si hubo cambios de rol
             await loadBoardData();
           }}
         />
       )}
-
-
     </div>
   );
 }

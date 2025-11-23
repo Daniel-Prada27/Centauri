@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./Pages/Home";
 import Login from "./Pages/Login";
+import ProfilePage from "./Pages/ProfilePage";
 import Register from "./Pages/Register";
 import Dashboard from "./Pages/Dashboard";
 import TeamsPage from "./Pages/TeamsPage";
@@ -23,6 +24,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/teamspage" element={<TeamsPage />} />
           <Route path="/boardpage/:id" element={<BoardPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Route>
 
         {/* Rutas privadas: solo accesibles si SÍ estás logueado */}
