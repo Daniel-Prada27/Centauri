@@ -115,6 +115,12 @@ export const deleteMember = (userId, teamId) =>
     id_team: teamId,
   });
 
+export const leaveTeam = (userId, teamId) =>
+  makeRequest("/member/leave", "DELETE", {
+    id_user: userId,
+    id_team: teamId,
+  });
+
 // Solicitar unirse mediante código
 export const joinTeam = (teamId) =>
   makeRequest("/member/invite/join", "POST", {
