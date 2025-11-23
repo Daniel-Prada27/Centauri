@@ -2,7 +2,7 @@
 
 .login-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa , #9fbde6, #6896c4);
+  background: linear-gradient(135deg, #f8f9fb, #f8f9fb, #f8f9fb);
   display: flex;
   height: 100vh;
   width: 100vw;
@@ -27,6 +27,10 @@
   transform: translateY(-2px);
 }
 
+.login-logo {
+  width: 150px;
+  margin-bottom: 16px;
+}
 .login-title {
   font-size: 20px;
   font-weight: 600;

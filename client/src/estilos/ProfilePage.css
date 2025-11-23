@@ -1,0 +1,77 @@
+.profile-page {
+  max-width: 500px;
+  margin: 40px auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(9, 30, 66, 0.15);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #172b4d;
+}
+
+.profile-page h2 {
+  text-align: center;
+  color: #0747a6;
+  margin-bottom: 20px;
+}
+
+.profile-info {
+  text-align: center;
+}
+
+.profile-info img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profile-form input {
+  padding: 8px;
+  border: 1px solid #dfe1e6;
+  border-radius: 5px;
+  outline: none;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.profile-form input:focus {
+  border-color: #0052cc;
+  box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.2);
+}
+
+.profile-form button {
+  background-color: #0052cc;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.profile-form button:hover {
+  background-color: #0065ff;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.form-actions button:last-child {
+  background-color: #ebecf0;
+  color: #172b4d;
+}
+
+.form-actions button:last-child:hover {
+  background-color: #dfe1e6;
+}

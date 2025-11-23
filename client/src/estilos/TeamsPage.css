@@ -1,0 +1,214 @@
+/* =========================================
+   LAYOUT GENERAL
+========================================= */
+.teams-container {
+  min-height: 100vh;
+  background: #f8f9fc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem;
+}
+
+/* =========================================
+   PANEL PRINCIPAL – Muy compacto y estilo Notion
+========================================= */
+.teams-panel {
+  width: 100%;
+  max-width: 360px;                  /* ← ancho exacto de tu captura */
+  margin: 0 auto;
+  background: white;
+  padding: 1.8rem 1.4rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* =========================================
+   TÍTULO
+========================================= */
+.teams-title {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 1.8rem;
+}
+
+/* =========================================
+   BOTONES PRINCIPALES – Estilo de tu imagen
+========================================= */
+.teams-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  background: #f1f3f9;
+  color: #555;
+}
+
+.btn-primary {
+  background: #f1f3f9;
+  color: #6e56cf;               /* morado del + Crear equipo */
+}
+.btn-primary svg { fill: #6e56cf; }
+
+.btn-secondary {
+  background: #f1f3f9;
+  color: #8b6fcf;               /* morado del enlace */
+}
+.btn-secondary svg { fill: #8b6fcf; }
+
+.btn-danger {
+  background: #f1f3f9;
+  color: #b85c5c;               /* rojizo del cerrar sesión */
+}
+.btn-danger svg { fill: #b85c5c; }
+
+.btn-primary:hover   { background: #e5e8f0; }
+.btn-secondary:hover { background: #e5e8f0; }
+.btn-danger:hover    { background: #e5e8f0; }
+
+/* =========================================
+   SECCIONES (Invitaciones / Mis equipos)
+========================================= */
+.accordion-header {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  background: #f1f3f9;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #444;
+  text-align: left;
+  border: none;
+  cursor: default;
+  margin-bottom: 0.75rem;
+}
+
+/* =========================================
+   ESTADOS VACÍOS
+========================================= */
+.empty-text {
+  text-align: center;
+  color: #999;
+  font-size: 0.9rem;
+  padding: 2rem 0;
+}
+
+/* =========================================
+   MODALES (mismo estilo limpio)
+========================================= */
+.modal-card {
+  width: 100%;
+  max-width: 340px;
+  background: white;
+  padding: 1.6rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  background: #fafafa;
+}
+
+.form-group input:focus {
+  border-color: #6e56cf;
+  background: white;
+  outline: none;
+}
+
+/* =========================================
+   BOTONES DE ACCIÓN PEQUEÑOS (lápiz y papelera)
+   → Funciona perfecto con tus clases: btn-warning icon-btn y btn-danger icon-btn
+========================================= */
+.icon-btn {
+  width: 34px !important;
+  height: 34px !important;
+  padding: 0 !important;
+  font-size: 1.1rem;              /* controla el tamaño del emoji */
+  border-radius: 10px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s ease;
+  flex-shrink: 0;
+  background: #f9f9fb !important;   /* fondo más limpio */
+  border: 1px solid #e8e8ec !important;
+}
+
+/* Hover bonito y sutil */
+.icon-btn:hover {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  background: #ffffff !important;
+}
+
+/* Colores específicos manteniendo tu lógica actual */
+.btn-warning.icon-btn {
+  color: #f59f00;
+  border-color: #fde8c4;
+}
+
+.btn-warning.icon-btn:hover {
+  color: #e67e22;
+  background: #fff8e1 !important;
+  border-color: #ffcc80;
+}
+
+.btn-danger.icon-btn {
+  color: #ff4444;
+  border-color: #ffcdd2;
+}
+
+.btn-danger.icon-btn:hover {
+  color: #cc0000;
+  background: #ffebee !important;
+  border-color: #ff8a80;
+}
+
+/* Fila de equipo – para que todo quede perfectamente alineado */
+.team-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 0.9rem;
+  background: #ffffff;
+  border: 1px solid #eef0f5;
+  border-radius: 12px;
+  margin-bottom: 0.65rem;
+  transition: all 0.2s ease;
+}
+
+.team-row:hover {
+  border-color: #d0d7e8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.team-button {
+  flex: 1;
+  text-align: left;
+  font-weight: 500;
+  color: #2d3748;
+  font-size: 0.95rem;
+}

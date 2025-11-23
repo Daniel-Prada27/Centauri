@@ -1,0 +1,443 @@
+/* ========================= */
+/*   TEMA JIRA PROFESIONAL   */
+/* ========================= */
+
+/* Paleta Atlassian:
+   Azul Jira: #0052CC
+   Azul Hover: #0065FF
+   Neutro claro: #F4F5F7
+   Neutro medio: #DFE1E6
+   Gris texto: #172B4D
+*/
+
+* {
+  font-family: "Inter", "Segoe UI", "Roboto", sans-serif;
+  box-sizing: border-box;
+}
+
+/* Fondo general estilo Jira */
+.board-page-root {
+  min-height: 100vh;
+  width: 100%;
+  background: #F4F5F7;
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+/* Contenedor centrado */
+.board-container {
+  width: 100%;
+  max-width: 1400px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+  margin: 0 auto;
+}
+
+/* ========================= */
+/*         HEADER            */
+/* ========================= */
+
+.board-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  padding: 12px 18px;
+  border-radius: 8px;
+  border: 1px solid #DFE1E6;
+  box-shadow: 0 1px 2px rgba(9,30,66,0.15);
+}
+
+.board-header-info h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #172B4D;
+  font-weight: 700;
+}
+
+	board-header-info p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #42526E;
+}
+
+.invite-section,
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Inputs Jira */
+.invite-section input,
+.header-actions input {
+  padding: 6px 10px;
+  border: 1px solid #DFE1E6;
+  border-radius: 4px;
+  background: white;
+  font-size: 0.9rem;
+  color: #172B4D;
+  transition: border 0.2s;
+}
+
+.invite-section input:focus,
+.header-actions input:focus {
+  border-color: #0052CC;
+  box-shadow: 0 0 0 2px rgba(0,82,204,0.2);
+  outline: none;
+}
+
+/* Botones Jira */
+.invite-section button,
+.header-actions button {
+  padding: 6px 14px;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border 0.2s;
+  border: none;
+}
+
+/* Botón enviar */
+.invite-section button {
+  background: #0052CC;
+  color: white;
+}
+.invite-section button:hover {
+  background: #0065FF;
+}
+
+/* Crear tarea */
+.header-actions .add-task {
+  background: #36B37E;
+  color: white;
+}
+.header-actions .add-task:hover {
+  background: #2e9b6c;
+}
+
+/* Gestor equipos */
+.header-actions .teams-manager-btn {
+  background: white;
+  border: 1px solid #0052CC;
+  color: #0052CC;
+}
+.header-actions .teams-manager-btn:hover {
+  background: #F0F7FF;
+}
+
+/* Logout */
+.header-actions .logout {
+  background: #DE350B;
+  color: white;
+}
+.header-actions .logout:hover {
+  background: #BF2600;
+}
+
+/* ========================= */
+/*    TABLERO (KANBAN)      */
+/* ========================= */
+
+.kanban-board {
+  display: flex;
+  justify-content: center;
+  gap: 1.8rem;
+}
+
+/* Columnas Jira */
+
+.kanban-column {
+  width: 340px;
+  min-height: 500px;
+  background: #F4F5F7;
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid #DFE1E6;
+}
+
+.kanban-column h3 {
+  text-align: center;
+  color: #0052CC;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+/* ========================= */
+/*       TARJETAS            */
+/* ========================= */
+
+.kanban-card {
+  background: white;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #DFE1E6;
+  box-shadow: 0 1px 2px rgba(9,30,66,0.15);
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.kanban-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(9,30,66,0.20);
+}
+
+.task-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #172B4D;
+  margin-bottom: 6px;
+}
+
+/* Selects Jira */
+.dropdown-group select {
+  width: 100%;
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid #DFE1E6;
+  font-size: 0.85rem;
+  background: white;
+}
+
+.dropdown-group label {
+  color: #42526E;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+/* Botón eliminar */
+.mini-btn.delete {
+  background: #DE350B;
+  color: white;
+  padding: 6px;
+  border-radius: 4px;
+  font-weight: 700;
+  margin-top: 8px;
+  cursor: pointer;
+  text-align: center;
+}
+.mini-btn.delete:hover {
+  background: #BF2600;
+}
+
+/* ========================= */
+/*  MODAL GESTOR DE EQUIPOS  */
+/* ========================= */
+
+.teams-manager-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+}
+
+.teams-manager-dialog {
+  width: 360px;
+  max-height: 90vh;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #DFE1E6;
+  box-shadow: 0px 4px 20px rgba(9,30,66,0.25);
+  animation: fadeInScale 0.18s ease;
+}
+
+.teams-manager-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: #F4F5F7;
+  border: 1px solid #DFE1E6;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* ========================= */
+/*  MODAL TAREAS  */
+/* ========================= */
+
+/* Overlay semi-transparente */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4); /* Fondo oscuro semi-transparente */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Modal principal */
+.modal {
+  background: #ffffff;
+  padding: 30px 25px;
+  border-radius: 10px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Animación */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Título */
+.modal h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #172b4d;
+  border-bottom: 1px solid #e4e6eb;
+  padding-bottom: 10px;
+}
+
+/* Labels */
+.modal label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 5px;
+  color: #172b4d;
+}
+
+/* Inputs y selects */
+.modal input[type="text"],
+.modal input[type="date"],
+.modal select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #dfe1e6;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.modal input:focus,
+.modal select:focus {
+  border-color: #0052cc;
+  box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.2);
+}
+
+/* Botones */
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.modal-actions button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.modal-actions button:first-child {
+  background-color: #0052cc;
+  color: #fff;
+}
+
+.modal-actions button:first-child:hover {
+  background-color: #0065ff;
+}
+
+.modal-actions button:last-child {
+  background-color: #e4e6eb;
+  color: #172b4d;
+}
+
+.modal-actions button:last-child:hover {
+  background-color: #dfe1e6;
+}
+
+/*para los iconos*/
+
+.user-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mini-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/*para el tablero de tareas*/
+
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.expand-btn {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.task-details {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #ddd;
+}
+
+/*para la pantalla de carga*/
+
+.loader-container {
+  position: fixed; /* Se queda al frente */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #d1d1d1;
+  border-top-color: #4a90e2;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

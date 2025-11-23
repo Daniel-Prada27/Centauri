@@ -47,7 +47,6 @@ export const readTeam = async (userId) => {
             users: {
                 some: {
                     id_user: userId,
-                    role: "owner"
                 }
             }
         }

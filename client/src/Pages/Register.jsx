@@ -3,6 +3,7 @@ import { FaGoogle } from "react-icons/fa";
 import "../estilos/Login.css";
 // import the authClient for Better Auth
 import { authClient } from "../../../server/lib/auth-client.js";
+import logo from '../assets/logo.png';
 
 function Register() {
   const [name, setName] = useState("");
@@ -55,6 +56,7 @@ function Register() {
   return (
     <div className="login-container">
       <div className="login-card">
+        <img src={logo} alt="Logo" className="login-logo" />
         <h2 className="login-title">Crear una cuenta en Centauri</h2>
 
         <form onSubmit={handleRegister}>

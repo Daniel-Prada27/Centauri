@@ -1,0 +1,217 @@
+/* ============================= */
+/*   SIDEBAR ESTILO JIRA        */
+/* ============================= */
+
+* {
+  font-family: "Inter", "Segoe UI", "Roboto", sans-serif;
+}
+
+/* Panel principal (dentro del modal) */
+.teams-panel {
+  width: 100%;
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  background: #ffffff;
+  border: 1px solid #DFE1E6;
+  border-radius: 6px;
+
+  /* 🔥 ESTO AGREGA EL SCROLL */
+  max-height: 65vh;
+  overflow-y: auto;
+}
+
+/* ===== Scroll estilo JIRA ===== */
+
+.teams-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.teams-panel::-webkit-scrollbar-thumb {
+  background: #C1C7D0;  /* gris Jira */
+  border-radius: 10px;
+}
+
+.teams-panel::-webkit-scrollbar-thumb:hover {
+  background: #A5ACB8; /* hover más oscuro */
+}
+
+/* ============================= */
+/*           TÍTULO             */
+/* ============================= */
+
+.teams-panel .teams-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-align: center;
+  color: #172B4D; /* Atlassian text color */
+  margin-bottom: 0.6rem;
+}
+
+/* ============================= */
+/*           BOTONES            */
+/* ============================= */
+
+.teams-panel button {
+  width: 100%;
+  padding: 10px 0;
+  border-radius: 4px;
+  background: #F4F5F7; /* Atlassian neutral */
+  color: #172B4D;
+  font-weight: 600;
+  border: 1px solid #DFE1E6;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.teams-panel button:hover {
+  background: #EBECF0;
+  box-shadow: 0 1px 2px rgba(9,30,66,0.15);
+}
+
+/* ============================= */
+/*         SECCIONES            */
+/* ============================= */
+
+.teams-section-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #42526E;
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+
+/* ============================= */
+/*       LISTA DE EQUIPOS       */
+/* ============================= */
+
+.team-row {
+  background: white;
+  border: 1px solid #DFE1E6;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  transition: box-shadow 0.15s ease;
+}
+
+.team-row:hover {
+  box-shadow: 0 2px 6px rgba(9,30,66,0.12);
+}
+
+.team-row * {
+  font-size: 0.9rem;
+  color: #172B4D;
+}
+
+/* ============================= */
+/*   INVITACIONES PENDIENTES    */
+/* ============================= */
+
+.invite-item {
+  background: white;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #DFE1E6;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.invite-item span {
+  font-size: 0.9rem;
+  color: #172B4D;
+}
+
+/* ============================= */
+/*         MODAL INTERNO        */
+/* ============================= */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 5000;
+}
+
+.modal-card {
+  background: white;
+  padding: 1.5rem;
+  width: 360px;
+  border-radius: 8px;
+  border: 1px solid #DFE1E6;
+  box-shadow: 0px 4px 20px rgba(9,30,66,0.25);
+  animation: fadeInScale 0.18s ease;
+}
+
+/* Inputs estilo Jira */
+.modal-card input {
+  width: 100%;
+  padding: 8px 10px;
+  margin-top: 8px;
+  border: 1px solid #DFE1E6;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #172B4D;
+}
+
+.modal-card input:focus {
+  border-color: #0052CC;
+  box-shadow: 0 0 0 2px rgba(0,82,204,0.25);
+  outline: none;
+}
+
+/* Botones de los modales */
+.modal-card button {
+  margin-top: 14px;
+  padding: 10px;
+  width: 100%;
+  border-radius: 4px;
+  font-weight: 600;
+  background: #0052CC;
+  color: white;
+  cursor: pointer;
+  border: none;
+  transition: background 0.15s ease;
+}
+
+.modal-card button:hover {
+  background: #0065FF;
+}
+
+/* Animación */
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Scroll SOLO en Mis equipos */
+.teams-scroll-area {
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Scroll bonito estilo Jira */
+.teams-scroll-area::-webkit-scrollbar {
+  width: 6px;
+}
+
+.teams-scroll-area::-webkit-scrollbar-thumb {
+  background: #C1C7D0;
+  border-radius: 10px;
+}
+
+.teams-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: #A5ACB8;
+}
+
