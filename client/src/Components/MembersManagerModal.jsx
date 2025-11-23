@@ -70,7 +70,13 @@ export default function MembersManagerModal({ teamId, onClose, initialMembers })
             className="flex justify-between items-center py-2 border-b"
           >
             <div>
-              <p className="font-medium">{member.name}</p>
+              <img 
+                src={member.picture}
+                alt={member.name}
+                className="mini-avatar"
+                style={{ marginRight: "8px" }}
+              />
+              {member.name}
               <p className="text-sm text-gray-500">{member.email}</p>
             </div>
 
