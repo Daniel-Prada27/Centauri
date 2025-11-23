@@ -28,47 +28,94 @@ function Login() {
             // Verificar si pertenece a algún equipo
             await checkUserTeam(user.user_id);
 
-            } catch (err) {
+        } catch (err) {
             console.error("Error al obtener usuario:", err);
-            alert("Error al validar sesión ❌");
+            alert("Error al obtener usuario ❌");
         }
     };
 
     const checkUserTeam = async () => {
-    try {
-        const res = await fetch("http://localhost:3000/team", {
-        method: "GET",
-        credentials: "include", // importante: para enviar cookies o sesión
-        });
+        try {
+            const res = await fetch("http://localhost:3000/team", {
+                method: "GET",
+                credentials: "include", // importante: para enviar cookies o sesión
+            });
 
-        if (!res.ok) throw new Error("Error al obtener equipos del usuario");
-        console.log("Redirigiendo a teamspage");
-        navigate("/teamspage");
-    } catch (err) {
-        console.error("Error al comprobar equipo:", err);
-        alert("No se pudo validar si el usuario tiene equipo ❌");
-    }
+            if (!res.ok) throw new Error("Error al obtener equipos del usuario");
+            console.log("Redirigiendo a teamspage");
+            navigate("/teamspage");
+        } catch (err) {
+            console.error("Error al comprobar equipo:", err);
+            alert("No se pudo validar si el usuario tiene equipo ❌");
+        }
     };
 
+    const makeRequest = async (endpoint, method, body, customHeaders = {}) => {
+        // setLoading(true);
+        // setError(null);
+        // setMessage(null);
+
+        try {
+            const response = await fetch(`http://localhost:3000${endpoint}`, {
+                method,
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...customHeaders,
+                },
+                body: body ? JSON.stringify(body) : undefined,
+            });
+
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.message || "Request failed");
+            }
+
+            const data = await response.json();
+            // setMessage(data.message || "Operación exitosa");
+            console.log(data);
+            return data;
+        } catch (err) {
+            // setError(err.message);
+        } finally {
+            // setLoading(false);
+        }
+    };
 
     // Iniciar sesión con Google (Better Auth)
     const handleGoogleLogin = async () => {
         try {
-            const { data, error } = await authClient.signIn.social({
-                provider: "google",
-            });
-
-            if (error) {
-                console.error("Error con Google:", error);
-                alert("Error al iniciar sesión con Google ❌");
-                return;
-            }
-
-            console.log("Inicio de sesión con Google exitoso:", data);
-            navigate("/teamspage");
+            const { data, error } = await authClient.signIn.social(
+                {
+                    provider: "google",
+                    callbackURL: "http://localhost:5173/teamspage"
+                },
+                {
+                    onRequest: () => {
+                        // Show loading spinner
+                    },
+                    onSuccess: async (ctx) => {
+                        // ctx.data contains redirect URL
+                        // ctx.response contains session info
+                        // Redirect happens automatically unless you disable it
+                        console.log("Inicio de sesión exitoso:", ctx);
+                        console.log(ctx.data);
+                        let profile = {
+                            "occupation": "",
+                        }
+                        await makeRequest("/profile", "POST", profile)
+                        // await fetchUserData()
+                        // navigate("/dashboard");
+                        // navigate("https:localhost:5173/teamspage");
+                    },
+                    onError: (ctx) => {
+                        alert(ctx.error.message);
+                    },
+                }
+            );
         } catch (err) {
             console.error("Error al iniciar sesión con Google:", err);
-            alert("Error con Google ❌");
+            alert("Error con Google ❌", err);
         }
     };
 
@@ -77,22 +124,22 @@ function Login() {
     const handleEmailLogin = async (e) => {
         e.preventDefault();
         try {
-        await authClient.signIn.email(
-            { email, password },
-            {
-            onSuccess: async (ctx) => {
-                console.log("Inicio de sesión exitoso:", ctx);
-                await fetchUserData();
-            },
-            onError: (ctx) => {
-                console.error("Error al iniciar sesión:", ctx.error);
-                alert("Correo o contraseña incorrectos ❌");
-            },
-            }
-        );
+            await authClient.signIn.email(
+                { email, password },
+                {
+                    onSuccess: async (ctx) => {
+                        console.log("Inicio de sesión exitoso:", ctx);
+                        await fetchUserData();
+                    },
+                    onError: (ctx) => {
+                        console.error("Error al iniciar sesión:", ctx.error);
+                        alert("Correo o contraseña incorrectos ❌");
+                    },
+                }
+            );
         } catch (err) {
-        console.error("Error general al iniciar sesión:", err);
-        alert("Error al iniciar sesión ❌");
+            console.error("Error general al iniciar sesión:", err);
+            alert("Error al iniciar sesión ❌");
         }
     };
 
