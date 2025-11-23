@@ -53,6 +53,29 @@ export const readUserProfile = async(userId) => {
     return userProfile
 }
 
+export const readWholeUser = async(userId) => {
+    const exists = await prisma.user.findUnique({
+        where: {id: userId}
+    })
+
+    if (!exists) {
+        const error = new Error(`User doesn't exist`);
+        error.statusCode = 404;
+        throw error
+    }
+
+    const userProfile = await prisma.user.findUnique({
+        where: {
+            id: userId
+        },
+        include: {
+            profile: true
+        }
+    })
+
+    return userProfile
+}
+
 export const readUserProfileById = async(userId) => {
     const exists = await prisma.user.findUnique({
         where: {id: userId}

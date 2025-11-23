@@ -10,6 +10,10 @@ userProfileRouter.post('',
     SchemaValidation.validateUserProfile,
     controller.addUserProfile);
 
+userProfileRouter.get('/complete',
+    ValidateSession.validateSession,
+    controller.readWholeUser);
+
 userProfileRouter.get('/:id',
     ValidateSession.validateSession,
     controller.readUserProfileById);
@@ -25,6 +29,6 @@ userProfileRouter.put('',
     SchemaValidation.validateUserProfile,
     controller.updateUserProfile);
 
-    userProfileRouter.delete('/delete-profile',
-        ValidateSession.validateSession,
-        controller.deleteUserProfile);
+userProfileRouter.delete('/delete-profile',
+    ValidateSession.validateSession,
+    controller.deleteUserProfile);
