@@ -10,6 +10,7 @@ import
 const NotificationsPanel = ({ onClose }) => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("unread");
   const panelRef = useRef(null);
 
   // Cerrar al hacer clic fuera
@@ -26,7 +27,19 @@ const NotificationsPanel = ({ onClose }) => {
   const loadNotifications = async () => {
     try {
       const data = await getNotifications();
-      if (Array.isArray(data)) setNotifications(data);
+
+      if (Array.isArray(data)) {
+        const parsed = data.map(item => ({
+          id: item.id_notification,
+          read: item.read,
+          title: item.notification.title,
+          message: item.notification.message,
+          creation_date: item.notification.creation_date
+        }));
+
+      setNotifications(parsed);
+      }
+
       setLoading(false);
     } catch (err) {
       console.error("Error al obtener notificaciones:", err);
@@ -73,12 +86,29 @@ const NotificationsPanel = ({ onClose }) => {
         <h3>🔔 Notificaciones</h3>
         <button className="close-btn" onClick={onClose}>✕</button>
       </div>
+      <div className="notifications-tabs">
+        <button 
+          className={activeTab === "unread" ? "active" : ""} 
+          onClick={() => setActiveTab("unread")}
+        >
+          No leídas
+        </button>
+        <button 
+          className={activeTab === "read" ? "active" : ""} 
+          onClick={() => setActiveTab("read")}
+        >
+          Leídas
+        </button>
+      </div>
+
 
       {notifications.length === 0 ? (
         <p>No tienes notificaciones</p>
       ) : (
-        <ul className="notifications-list">
-          {[...notifications]
+
+      <ul className="notifications-list">
+        {[...notifications]
+          .filter(n => activeTab === "unread" ? !n.read : n.read)
           .sort((a, b) => new Date(b.creation_date) - new Date(a.creation_date))
           .map((n) => (
             <li
@@ -92,6 +122,7 @@ const NotificationsPanel = ({ onClose }) => {
                   timeZone: "UTC",
                 })}</small>
               </div>
+
               <div className="notification-actions">
                 {!n.read && (
                   <button onClick={() => markAsRead(n.id)}>Marcar como leída</button>
@@ -100,7 +131,8 @@ const NotificationsPanel = ({ onClose }) => {
               </div>
             </li>
           ))}
-        </ul>
+      </ul>
+
       )}
     </div>
   );

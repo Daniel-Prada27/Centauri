@@ -107,3 +107,24 @@
 .close-btn:hover {
   color: #172b4d;
 }
+
+.notifications-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.notifications-tabs button {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  background: #95a2d4;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.notifications-tabs button.active {
+  background: #0747a6;
+  color: white;
+}
