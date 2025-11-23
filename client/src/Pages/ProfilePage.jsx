@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../estilos/ProfilePage.css";
+
+import {
+  getProfile,
+  updateProfile,
+  createProfile,
+} from "../utils/api";
 
 function ProfilePage() {
   const [profile, setProfile] = useState(null);
@@ -8,14 +15,14 @@ function ProfilePage() {
   const [occupation, setOccupation] = useState("");
   const [location, setLocation] = useState("");
   const [picture, setPicture] = useState("");
+  const navigate = useNavigate();
 
   // ======================
   //  Cargar perfil (GET)
   // ======================
   const loadProfile = async () => {
     try {
-      const res = await fetch("http://localhost:3000/profile");
-      const data = await res.json();
+      const data = await getProfile();
 
       // Si el perfil no existe aún
       if (!data || !data.user_id) {
@@ -44,13 +51,12 @@ function ProfilePage() {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://localhost:3000/profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ occupation, location, picture }),
+      const data = await createProfile({
+        occupation,
+        location,
+        picture
       });
 
-      const data = await res.json();
       alert("✅ Perfil creado correctamente");
       setProfile(data);
       setIsEditing(false);
@@ -67,15 +73,22 @@ function ProfilePage() {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://localhost:3000/profile", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ occupation, location, picture }),
+      const data = await updateProfile({
+        occupation,
+        location,
+        picture
       });
 
-      const data = await res.json();
       alert("✅ Perfil actualizado");
-      setProfile(data);
+
+      //para que se mantenga la información previa
+      setProfile((prev) => ({
+      ...prev,
+      occupation: data.occupation,
+      location: data.location,
+      picture: data.picture
+      }));
+
       setIsEditing(false);
     } catch (err) {
       console.error("Error actualizando perfil:", err);
@@ -138,7 +151,7 @@ function ProfilePage() {
       src={
         profile.picture && profile.picture !== "pfp/juan"
           ? profile.picture
-          : "https://via.placeholder.com/100"
+          : "https://img.freepik.com/vector-premium/icono-perfil-avatar-predeterminado-imagen-usuario-redes-sociales-icono-avatar-gris-silueta-perfil-blanco-ilustracion-vectorial_561158-3485.jpg?w=360"
       }
       alt="Foto de perfil"
     />
@@ -149,6 +162,10 @@ function ProfilePage() {
     <p>📍 {profile.location || "Sin ubicación"}</p>
 
     <button onClick={() => setIsEditing(true)}>Editar perfil</button>
+    <button className="back-btn" onClick={() => navigate(-1)}>
+      ⬅️ Volver
+    </button>
+
   </div>
 )}
 

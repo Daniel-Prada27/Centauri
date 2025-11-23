@@ -1,5 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import "../estilos/NotificationsPanel.css";
+import 
+{ 
+  getNotifications,
+  updateNotifications,
+  deleteNotifications,
+} from "../utils/api";
 
 const NotificationsPanel = ({ onClose }) => {
   const [notifications, setNotifications] = useState([]);
@@ -19,8 +25,7 @@ const NotificationsPanel = ({ onClose }) => {
 
   const loadNotifications = async () => {
     try {
-      const res = await fetch("http://localhost:3000/notification");
-      const data = await res.json();
+      const data = await getNotifications();
       if (Array.isArray(data)) setNotifications(data);
       setLoading(false);
     } catch (err) {
@@ -31,9 +36,12 @@ const NotificationsPanel = ({ onClose }) => {
 
   const markAsRead = async (id) => {
     try {
-      await fetch(`http://localhost:3000/notification/${id}`, { method: "PUT" });
+      await updateNotifications(id);
+
       setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+        prev.map((n) =>
+          n.id === id ? { ...n, read: true } : n
+        )
       );
     } catch (err) {
       console.error("Error al marcar como leída:", err);
@@ -42,12 +50,16 @@ const NotificationsPanel = ({ onClose }) => {
 
   const deleteNotification = async (id) => {
     try {
-      await fetch(`http://localhost:3000/notification/${id}`, { method: "DELETE" });
-      setNotifications((prev) => prev.filter((n) => n.id !== id));
+      await deleteNotifications(id);
+
+      setNotifications((prev) =>
+        prev.filter((n) => n.id !== id)
+      );
     } catch (err) {
       console.error("Error al eliminar:", err);
     }
   };
+
 
   useEffect(() => {
     loadNotifications();

@@ -53,6 +53,12 @@ export const getProfile = () =>
 export const getUserProfile = (userId) =>
   makeRequest(`/profile/${userId}`, "GET");
 
+export const createProfile = (data) =>
+  makeRequest("/profile", "POST", data);
+
+export const updateProfile = (data) =>
+  makeRequest("/profile", "PUT", data);
+
 // ======================================================
 //  TEAMS
 // ======================================================
@@ -129,3 +135,16 @@ export const updateTask = (taskId, updatedTask) =>
 export const deleteTask = (taskId) =>
   makeRequest(`/task/${taskId}`, "DELETE");
 
+
+// ======================================================
+//  NOTIFICATIONS
+// ======================================================
+
+export const getNotifications = () =>
+  makeRequest("/notification", "GET");
+
+export const updateNotifications = (notificationId) =>
+  makeRequest(`/notification/${notificationId}`, "PUT");
+
+export const deleteNotifications = (notificationId) =>
+  makeRequest(`/notification/${notificationId}`, "DELETE");
