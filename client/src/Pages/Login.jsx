@@ -57,7 +57,7 @@ function Login() {
                         let profile = {
                             "occupation": "",
                         }
-                        await makeRequest("/profile", "POST", profile)
+                        // await makeRequest("/profile", "POST", profile)
                         // await fetchUserData()
                         // navigate("/dashboard");
                         // navigate("https:localhost:5173/teamspage");
