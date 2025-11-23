@@ -61,7 +61,7 @@ function ProfilePage() {
       const userData = await getProfile();
       alert("✅ Perfil creado correctamente");
       setProfile(userData);
-      setIsEditing(false);
+      navigate("/teamspage");
     } catch (err) {
       console.error("Error creando perfil:", err);
       alert("Error al crear el perfil");
