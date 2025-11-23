@@ -40,6 +40,7 @@ function BoardPage() {
   const [taskType, setTaskType] = useState("business");
   const [taskResponsible, setTaskResponsible] = useState("");
   const [taskDueDate, setTaskDueDate] = useState("");
+  const [openTask, setOpenTask] = useState(null);
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -179,6 +180,10 @@ function BoardPage() {
   // ===========================
   //   Actualizar tarea
   // ===========================
+  const toggleTask = (id) => {
+  setOpenTask((prev) => (prev === id ? null : id));
+  };
+
   const handleTaskUpdate = async (taskId, updates) => {
     try {
       const currentTask = tasks.find((t) => t.id === taskId);
@@ -225,12 +230,20 @@ function BoardPage() {
   if (loading) return <p>Cargando...</p>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
+  // Para los nombres
   const getResponsibleName = (userId) => {
     if (!userId) return "Sin responsable";
     if (profilesCache[userId]?.user?.name) return profilesCache[userId].user.name;
     const m = members.find((x) => x.id_user === userId);
     return m?.name || "Sin responsable";
   };
+  
+  // Para las imagenes
+  const getResponsiblePicture = (userId) => {
+  const member = members.find(m => m.id_user === userId);
+  return member?.picture || "/default_profile.png";
+  };
+
 
   // ===========================
   //   RENDER
@@ -242,7 +255,14 @@ function BoardPage() {
         <div className="board-header">
           <div className="board-header-info">
             <h2>{team?.name}</h2>
-            <p>👤 {user?.name}</p>
+            <p className="user-line">
+              <img
+                src={user?.picture}
+                alt="pfp"
+                className="mini-avatar"
+              />
+              {user?.name}
+            </p>
           </div>
 
           <div className="invite-section">
@@ -296,55 +316,82 @@ function BoardPage() {
               {tasks
                 .filter((t) => t.status === st.key)
                 .map((t) => (
+                  
                   <div key={t.id} className="kanban-card">
-                    <p className="task-title">{t.name}</p>
-                    <small>
-                      🗓️ {new Date(t.due_date).toLocaleDateString()}
-                      <br />
-                      👤 {getResponsibleName(t.id_responsible)}
-                    </small>
 
-                    <div className="task-controls">
-                      <div className="dropdown-group">
-                        <label>Estado:</label>
-                        <select
-                          value={t.status}
-                          onChange={(e) =>
-                            handleTaskUpdate(t.id, { status: e.target.value })
-                          }
-                        >
-                          <option value="pending">Pendiente</option>
-                          <option value="in_progress">En progreso</option>
-                          <option value="completed">Completado</option>
-                        </select>
+                    {/* CABECERA / PARTE SIEMPRE VISIBLE */}
+                    <div className="task-header" onClick={() => toggleTask(t.id)}>
+                      <div>
+                        <p className="task-title">{t.name}</p>
+                        <small>
+                          🗓️ {new Date(t.due_date).toLocaleDateString()}
+
+                          <div className="responsible-info">
+                            <img
+                              src={getResponsiblePicture(t.id_responsible)}
+                              alt="profile"
+                              className="mini-avatar"
+                              style={{ marginRight: "8px" }}
+                            />
+                            {getResponsibleName(t.id_responsible)}
+                          </div>
+                        </small>
                       </div>
 
-                      <div className="dropdown-group">
-                        <label>Prioridad:</label>
-                        <select
-                          value={t.priority}
-                          onChange={(e) =>
-                            handleTaskUpdate(t.id, { priority: e.target.value })
-                          }
-                        >
-                          <option value="low">Baja</option>
-                          <option value="medium">Media</option>
-                          <option value="high">Alta</option>
-                        </select>
-                      </div>
-
-                      <button
-                        className="mini-btn delete"
-                        onClick={() => handleDeleteTask(t.id)}
-                      >
-                        🗑️
+                      <button className="expand-btn">
+                        {openTask === t.id ? "▲" : "▼"}
                       </button>
                     </div>
+
+                    {/* SECCIÓN DESPLEGABLE */}
+                    {openTask === t.id && (
+                      <div className="task-details">
+
+                        <div className="dropdown-group">
+                          <label>Estado:</label>
+                          <select
+                            value={t.status}
+                            onChange={(e) =>
+                              handleTaskUpdate(t.id, { status: e.target.value })
+                            }
+                          >
+                            <option value="pending">Pendiente</option>
+                            <option value="in_progress">En progreso</option>
+                            <option value="completed">Completado</option>
+                          </select>
+                        </div>
+
+                        <div className="dropdown-group">
+                          <label>Prioridad:</label>
+                          <select
+                            value={t.priority}
+                            onChange={(e) =>
+                              handleTaskUpdate(t.id, { priority: e.target.value })
+                            }
+                          >
+                            <option value="low">Baja</option>
+                            <option value="medium">Media</option>
+                            <option value="high">Alta</option>
+                          </select>
+                        </div>
+
+                        <button
+                          className="mini-btn delete"
+                          onClick={() => handleDeleteTask(t.id)}
+                        >
+                          🗑️
+                        </button>
+
+                      </div>
+                    )}
+
                   </div>
+
                 ))}
             </div>
           ))}
         </div>
+        
       </div>
 
       {/* MODAL CREAR TAREA */}

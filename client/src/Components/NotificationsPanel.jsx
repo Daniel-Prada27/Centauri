@@ -65,7 +65,7 @@ const NotificationsPanel = ({ onClose }) => {
     loadNotifications();
   }, []);
 
-  if (loading) return <p>Cargando notificaciones...</p>;
+  if (loading) return null;
 
   return (
     <div className="notifications-panel" ref={panelRef}>
