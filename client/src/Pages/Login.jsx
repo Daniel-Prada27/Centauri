@@ -6,6 +6,10 @@ import { authClient } from "../../../server/lib/auth-client.js";
 import "../estilos/Login.css";
 import logo from '../assets/logo.png';
 
+import {
+  getProfile,
+} from "../utils/api";
+
 function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -14,71 +18,21 @@ function Login() {
     //autentificar que el usuario existe
     const fetchUserData = async () => {
         try {
-            const res = await fetch("http://localhost:3000/profile", {
-                method: "GET",
-                credentials: "include", // envía cookie de sesión
-                headers: { "Content-Type": "application/json" },
-            });
-
-            if (!res.ok) throw new Error("No se pudo obtener el usuario");
-            const user = await res.json();
-
+            const user = await getProfile();
             console.log("Usuario autenticado:", user);
 
-            // Verificar si pertenece a algún equipo
-            await checkUserTeam(user.user_id);
+            if (!user || !user.user_id) {
+                console.log("Usuario sin perfil → redirigiendo a ProfilePage");
+                navigate("/profile");
+                return; // detener ejecución
+            }
+
+            // Pasar a teamspage a unirse o crear un equipo
+            navigate("/teamspage");
 
         } catch (err) {
             console.error("Error al obtener usuario:", err);
             alert("Error al obtener usuario ❌");
-        }
-    };
-
-    const checkUserTeam = async () => {
-        try {
-            const res = await fetch("http://localhost:3000/team", {
-                method: "GET",
-                credentials: "include", // importante: para enviar cookies o sesión
-            });
-
-            if (!res.ok) throw new Error("Error al obtener equipos del usuario");
-            console.log("Redirigiendo a teamspage");
-            navigate("/teamspage");
-        } catch (err) {
-            console.error("Error al comprobar equipo:", err);
-            alert("No se pudo validar si el usuario tiene equipo ❌");
-        }
-    };
-
-    const makeRequest = async (endpoint, method, body, customHeaders = {}) => {
-        // setLoading(true);
-        // setError(null);
-        // setMessage(null);
-
-        try {
-            const response = await fetch(`http://localhost:3000${endpoint}`, {
-                method,
-                credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                    ...customHeaders,
-                },
-                body: body ? JSON.stringify(body) : undefined,
-            });
-
-            if (!response.ok) {
-                const errData = await response.json();
-                throw new Error(errData.message || "Request failed");
-            }
-
-            const data = await response.json();
-            // setMessage(data.message || "Operación exitosa");
-            console.log(data);
-            return data;
-        } catch (err) {
-            // setError(err.message);
-        } finally {
-            // setLoading(false);
         }
     };
 

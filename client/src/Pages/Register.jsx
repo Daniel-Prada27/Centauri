@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FaGoogle } from "react-icons/fa";
 import "../estilos/Login.css";
+import { useNavigate } from "react-router-dom";
 // import the authClient for Better Auth
 import { authClient } from "../../../server/lib/auth-client.js";
 import logo from '../assets/logo.png';
@@ -9,6 +10,7 @@ function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   // Crear cuenta con correo y contraseña
   const handleRegister = async (e) => {
@@ -25,7 +27,7 @@ function Register() {
         alert("Error al crear la cuenta ❌: " + error.message);
       } else {
         alert("Cuenta creada exitosamente ✅");
-        // you may redirect, or clear form, etc.
+        navigate("/profile");
       }
     } catch (err) {
       console.error("Error al registrar:", err);
@@ -45,7 +47,7 @@ function Register() {
         alert("Error al registrarse con Google ❌: " + error.message);
       } else {
         alert("Registro con Google exitoso ✅");
-        // redirect or whatever
+        navigate("/profile");
       }
     } catch (err) {
       console.error("Error al registrarse con Google:", err);
