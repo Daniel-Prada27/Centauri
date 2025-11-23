@@ -77,14 +77,12 @@ export const createTeamNotification = async (data) => {
 export const readNotifications = async (userId) => {
 
     await checkUserExistence(userId)
-    const notifications = await prisma.notification.findMany({
+    const notifications = await prisma.notificationMember.findMany({
         where: {
-            members: {
-                some: {
-                    id_member: userId
-                }
-
-            }
+            id_member: userId
+        },
+        include: {
+            notification: true
         }
     })
 
