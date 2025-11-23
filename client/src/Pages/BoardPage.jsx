@@ -227,7 +227,7 @@ function BoardPage() {
     signOut(navigate);
   };
 
-  if (loading) return <p>Cargando...</p>;
+  if (loading) return   <div className="loader-container"><div className="spinner"></div></div>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   // Para los nombres
@@ -470,7 +470,6 @@ function BoardPage() {
           initialMembers={members}
           onClose={async () => {
             setShowMembersModal(false);
-            await loadBoardData();
           }}
         />
       )}
