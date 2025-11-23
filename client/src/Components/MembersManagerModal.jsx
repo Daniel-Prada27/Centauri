@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { updateMemberRole, getUserProfile, getTeamMembers } from "../utils/api";
+import { updateMemberRole, getUserProfile, getTeamMembers, deleteMember } from "../utils/api";
 import "../estilos/MembersManagerModal.css";
 
-export default function MembersManagerModal({ teamId, onClose, initialMembers }) {
+export default function MembersManagerModal({ teamId, onClose}) {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(null); // id_user que se está guardando
@@ -23,7 +23,7 @@ export default function MembersManagerModal({ teamId, onClose, initialMembers })
         })
       );
 
-      setMembers(withNames);
+      setMembers(withNames.filter(m => m.role !== "pending"));
     } catch (err) {
       console.error("Error recargando miembros:", err);
     }
@@ -41,6 +41,21 @@ export default function MembersManagerModal({ teamId, onClose, initialMembers })
     } catch (err) {
       console.error("Error actualizando rol:", err);
       alert("Error al actualizar el rol");
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const handleDeleteMember = async (member) => {
+    if (!window.confirm(`¿Eliminar a ${member.name} del equipo?`)) return;
+
+    setSaving(member.id_user);
+    try {
+      await deleteMember(member.id_user, teamId);
+      await reloadMembers();
+    } catch (err) {
+      console.error("Error eliminando miembro:", err);
+      alert("Error al eliminar miembro ❌");
     } finally {
       setSaving(null);
     }
@@ -93,6 +108,13 @@ export default function MembersManagerModal({ teamId, onClose, initialMembers })
               <option value="operator">Operador</option>
               <option value="viewer">Viewer</option>
             </select>
+            <button
+              className="p-1 rounded hover:bg-red-100 text-red-600 text-sm transition"
+              disabled={saving === member.id_user}
+              onClick={() => handleDeleteMember(member)}
+            >
+              🗑️
+            </button>
           </div>
         ))}
       </div>

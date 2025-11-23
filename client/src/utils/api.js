@@ -109,11 +109,18 @@ export const updateMemberRole = (userId, teamId, role) =>
     role,
   });
 
+export const deleteMember = (userId, teamId) =>
+  makeRequest("/member", "DELETE", {
+    id_user: userId,
+    id_team: teamId,
+  });
+
 // Solicitar unirse mediante código
 export const joinTeam = (teamId) =>
   makeRequest("/member/invite/join", "POST", {
     id_team: teamId,
   });
+
 
 // ======================================================
 //  TASKS
