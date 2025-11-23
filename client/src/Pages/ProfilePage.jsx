@@ -98,7 +98,7 @@ function ProfilePage() {
     }
   };
 
-  if (loading) return <p>Cargando perfil...</p>;
+  if (loading) return null;
 
   // ======================
   //  Render

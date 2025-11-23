@@ -18,7 +18,7 @@ export default function TeamsSidebar() {
   const [user, setUser] = useState(null);
   const [teams, setTeams] = useState([]);
 
-  const [invitations, setInvitations] = useState([]);
+  const [invitations, setInvitations] = useState(null);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [teamName, setTeamName] = useState("");
@@ -180,7 +180,7 @@ export default function TeamsSidebar() {
 
         {openInvites && (
           <div className="accordion-content">
-            {invitations.length === 0 ? (
+            {invitations === null ? (
               <p className="empty-text">No tienes invitaciones pendientes.</p>
             ) : (
               invitations.map(inv => (
@@ -210,8 +210,10 @@ export default function TeamsSidebar() {
 
         {openTeams && (
           <div className="accordion-content teams-scroll-area">
-            {teams.length > 0 ? (
-              teams.map(team => (
+          {invitations === null ? (
+            <p className="empty-text">Cargando equipos...</p>   // ← EVITA EL PARPADEO
+            ) : teams.length > 0 ? (
+              teams.filter(team => !invitations.some(inv => inv.id === team.id)).map(team => (
                 <div key={team.id} className="team-row">
 
                   <button
