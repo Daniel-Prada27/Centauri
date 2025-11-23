@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { updateMemberRole } from "../utils/api";
 import { getUserProfile } from "../utils/api";
-import "../estilos/TeamsPage.css";
+import "../estilos/MembersManagerModal.css";
 
 export default function MembersManagerModal({ teamId, onClose, initialMembers }) {
   const [members, setMembers] = useState([]);

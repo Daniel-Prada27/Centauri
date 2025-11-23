@@ -1,0 +1,149 @@
+/* =========================================
+   OVERLAY (fondo semitransparente tipo Jira)
+========================================= */
+.teams-manager-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(9, 30, 66, 0.54); /* Atlassian modal overlay */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+/* =========================================
+   DIALOGO PRINCIPAL
+   Caja blanca estilo Jira
+========================================= */
+.teams-manager-dialog {
+  width: 480px;
+  max-width: 90%;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.2);
+
+  font-family: "Inter", "Segoe UI", sans-serif;
+  position: relative;
+  animation: jiraFadeIn 0.25s ease-out;
+}
+
+/* Animación suave */
+@keyframes jiraFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================
+   BOTÓN CERRAR
+========================================= */
+.teams-manager-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+
+  background: transparent;
+  border: none;
+  color: #42526e;
+  font-size: 20px;
+  cursor: pointer;
+
+  transition: color 0.2s ease;
+}
+
+.teams-manager-close:hover {
+  color: #172b4d;
+}
+
+/* =========================================
+   TITULO
+========================================= */
+.teams-manager-dialog h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #172b4d;
+  margin-bottom: 20px;
+}
+
+/* =========================================
+   ITEM DE MIEMBRO (similar al user row de Jira)
+========================================= */
+.teams-manager-dialog .member-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 12px 0;
+  border-bottom: 1px solid #dfe1e6;
+
+  transition: background 0.12s ease;
+}
+
+.teams-manager-dialog .member-row:hover {
+  background: #f4f5f7;
+}
+
+/* Texto del usuario */
+.member-info p.font-medium {
+  font-size: 15px;
+  font-weight: 600;
+  color: #172b4d;
+}
+
+.member-info p.text-gray-500 {
+  font-size: 13px;
+  color: #6b778c;
+}
+
+/* =========================================
+   DROPDOWN DE ROLES (estilo select de Jira)
+========================================= */
+.teams-manager-dialog select {
+  padding: 6px 10px;
+  font-size: 14px;
+
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  background: #f4f5f7;
+  color: #172b4d;
+
+  cursor: pointer;
+  transition: border 0.2s ease, background 0.2s ease;
+}
+
+.teams-manager-dialog select:hover {
+  background: #ebecf0;
+}
+
+.teams-manager-dialog select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =========================================
+   SCROLL DEL MODAL (si hay muchos usuarios)
+========================================= */
+.teams-manager-dialog {
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* scroll estilo Atlassian */
+.teams-manager-dialog::-webkit-scrollbar {
+  width: 6px;
+}
+
+.teams-manager-dialog::-webkit-scrollbar-thumb {
+  background: #b3bac5;
+  border-radius: 6px;
+}
+
+.teams-manager-dialog::-webkit-scrollbar-thumb:hover {
+  background: #7a869a;
+}
