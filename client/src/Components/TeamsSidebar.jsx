@@ -166,10 +166,6 @@ export default function TeamsSidebar() {
         <button className="btn-primary" onClick={() => setShowCreateModal(true)}>
           ➕ Crear equipo
         </button>
-
-        <button className="btn-secondary" onClick={() => setShowJoinModal(true)}>
-          🔗 Unirse a un equipo
-        </button>
       </div>
 
       {/* INVITACIONES PENDIENTES */}
@@ -254,8 +250,6 @@ export default function TeamsSidebar() {
         )}
       </div>
 
-      
-
       {/* MODALES */}
       {showCreateModal && (
         <div className="modal-overlay">
@@ -271,22 +265,6 @@ export default function TeamsSidebar() {
 
               <button className="btn-primary" type="submit">Crear</button>
               <button className="btn-secondary" onClick={() => setShowCreateModal(false)}>Cancelar</button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {showJoinModal && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <h3>Unirse a un equipo</h3>
-
-            <form onSubmit={handleJoinTeam}>
-              <label>ID del equipo</label>
-              <input type="text" value={joinCode} onChange={(e) => setjoinCode(e.target.value)} required />
-
-              <button className="btn-primary" type="submit">Unirse</button>
-              <button className="btn-secondary" onClick={() => setShowJoinModal(false)}>Cancelar</button>
             </form>
           </div>
         </div>

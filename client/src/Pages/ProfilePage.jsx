@@ -17,6 +17,7 @@ function ProfilePage() {
   const [picture, setPicture] = useState(
     "https://img.freepik.com/vector-premium/icono-perfil-avatar-predeterminado-imagen-usuario-redes-sociales-icono-avatar-gris-silueta-perfil-blanco-ilustracion-vectorial_561158-3485.jpg?w=360"
   );
+  const [showSpoilerId, setShowSpoilerId] = useState(false);
   const navigate = useNavigate();
 
   // ======================
@@ -98,6 +99,21 @@ function ProfilePage() {
     }
   };
 
+  const handleSpoilerClick = async () => {
+    if (!showSpoilerId) {
+      setShowSpoilerId(true);
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(profile.user_id);
+      alert("ID copiado al portapapeles!");
+    } catch (err) {
+      console.error("Error copiando:", err);
+      alert("No se pudo copiar ❌");
+    }
+  };
+
   if (loading) return null;
 
   // ======================
@@ -144,28 +160,49 @@ function ProfilePage() {
 
       {/* Si ya tiene perfil */}
       {profile && !isEditing && (
-  <div className="profile-info">
-    <img
-      src={
-        profile.picture && profile.picture !== "pfp/juan"
-          ? profile.picture
-          : "https://img.freepik.com/vector-premium/icono-perfil-avatar-predeterminado-imagen-usuario-redes-sociales-icono-avatar-gris-silueta-perfil-blanco-ilustracion-vectorial_561158-3485.jpg?w=360"
-      }
-      alt="Foto de perfil"
-    />
+        <div className="profile-info">
+          <img
+            src={
+              profile.picture && profile.picture !== "pfp/juan"
+                ? profile.picture
+                : "https://img.freepik.com/vector-premium/icono-perfil-avatar-predeterminado-imagen-usuario-redes-sociales-icono-avatar-gris-silueta-perfil-blanco-ilustracion-vectorial_561158-3485.jpg?w=360"
+            }
+            alt="Foto de perfil"
+          />
+          
+          {/* Spoiler del user_id */}
+          <div
+            onClick={handleSpoilerClick}
+            style={{
+              marginTop: "10px",
+              padding: "6px 10px",
+              background: "#eee",
+              borderRadius: "5px",
+              cursor: "pointer",
+              userSelect: "none",
+              fontSize: "0.9rem"
+            }}
+          >
+            {showSpoilerId ? (
+              <span>ID usuario: {profile.user_id}</span>
+            ) : (
+              <span>⚠️ Click para mostrar ID personal</span>
+              
+            )}
+          </div>
 
-    <h3>{profile.user?.name || "Nombre no disponible"}</h3>
-    <p>📧 {profile.user?.email || "Sin correo"}</p>
-    <p>💼 {profile.occupation || "Sin ocupación"}</p>
-    <p>📍 {profile.location || "Sin ubicación"}</p>
+          <h3>{profile.user?.name || "Nombre no disponible"}</h3>
+          <p>📧 {profile.user?.email || "Sin correo"}</p>
+          <p>💼 {profile.occupation || "Sin ocupación"}</p>
+          <p>📍 {profile.location || "Sin ubicación"}</p>
 
-    <button onClick={() => setIsEditing(true)}>Editar perfil</button>
-    <button className="back-btn" onClick={() => navigate(-1)}>
-      ⬅️ Volver
-    </button>
+          <button onClick={() => setIsEditing(true)}>Editar perfil</button>
+          <button className="back-btn" onClick={() => navigate(-1)}>
+            ⬅️ Volver
+          </button>
 
-  </div>
-)}
+        </div>
+      )}
 
 
       {/* Formulario de edición */}

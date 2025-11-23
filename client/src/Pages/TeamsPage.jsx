@@ -187,10 +187,6 @@ function TeamsPage() {
           <button className="btn-primary" onClick={() => setShowCreateModal(true)}>
             ➕ Crear equipo
           </button>
-
-          <button className="btn-secondary" onClick={() => setShowJoinModal(true)}>
-            🔗 Unirse a un equipo
-          </button>
         </div>
 
         {/* INVITACIONES ------------------------ */}
@@ -274,6 +270,13 @@ function TeamsPage() {
           )}
         </div>
 
+        <button
+          onClick={() => navigate("/profile")}
+          className="btn-profile"
+        >
+          Ir a mi Perfil
+        </button>
+
         <button className="btn-danger logout-btn" onClick={handleLogout}>
           🚪 Cerrar sesión
         </button>
@@ -299,31 +302,6 @@ function TeamsPage() {
 
               <button className="btn-primary" type="submit">Crear</button>
               <button className="btn-secondary" type="button" onClick={() => setShowCreateModal(false)}>
-                Cancelar
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL UNIRSE */}
-      {showJoinModal && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <h3>Unirse a un equipo</h3>
-
-            <form onSubmit={handleJoinTeam}>
-              <div className="form-group">
-                <label>ID del equipo</label>
-                <input type="text" value={joinCode} onChange={(e) => setJoinCode(e.target.value)} required />
-              </div>
-
-              <button className="btn-primary" type="submit">Unirse</button>
-              <button
-                className="btn-secondary"
-                type="button"
-                onClick={() => setShowJoinModal(false)}
-              >
                 Cancelar
               </button>
             </form>
