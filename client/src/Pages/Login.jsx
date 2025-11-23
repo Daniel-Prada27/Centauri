@@ -4,6 +4,7 @@ import { FaGoogle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { authClient } from "../../../server/lib/auth-client.js";
 import "../estilos/Login.css";
+import logo from '../assets/logo.png';
 
 function Login() {
     const [email, setEmail] = useState("");
@@ -98,7 +99,8 @@ function Login() {
     return (
         <div className="login-container">
             <div className="login-card">
-                <h2 className="login-title">Inicia sesión para continuar</h2>
+                <img src={logo} alt="Logo" className="login-logo" />
+                <h2 className="login-title">Iniciar sesión </h2>
                 <form onSubmit={handleEmailLogin}>
                     <div className="form-group">
                         <label htmlFor="email">Correo</label>

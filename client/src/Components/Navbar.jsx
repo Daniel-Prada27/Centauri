@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../estilos/Navbar.css";
-import logo from "../assets/react.svg";
+import logo from "../assets/logo.png";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -13,11 +13,7 @@ function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-left">
-        <img
-          src="/react.svg"
-          alt="Logo"
-          className="navbar-logo"
-        />
+        <img src={logo} alt="Logo" className="navbar-logo" />
         <span className="navbar-title"> CENTAURI</span>
       </div>
 
