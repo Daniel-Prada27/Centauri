@@ -287,7 +287,7 @@ function BoardPage() {
             </button>
 
             <button onClick={() => setShowMembersModal(true)}>
-              Gestionar Miembros
+              Gestionar miembros
             </button>
 
             <button
@@ -299,7 +299,7 @@ function BoardPage() {
             </button>
 
             <button className="profile-btn" onClick={() => navigate("/profile")}>
-              👤 Mi perfil
+              Mi perfil
             </button>
 
             <button className="logout" onClick={handleLogout}>
@@ -316,7 +316,7 @@ function BoardPage() {
               {tasks
                 .filter((t) => t.status === st.key)
                 .map((t) => (
-                  
+
                   <div key={t.id} className="kanban-card">
 
                     {/* CABECERA / PARTE SIEMPRE VISIBLE */}

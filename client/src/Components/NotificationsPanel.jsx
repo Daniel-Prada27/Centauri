@@ -78,7 +78,9 @@ const NotificationsPanel = ({ onClose }) => {
         <p>No tienes notificaciones</p>
       ) : (
         <ul className="notifications-list">
-          {notifications.map((n) => (
+          {[...notifications]
+          .sort((a, b) => new Date(b.creation_date) - new Date(a.creation_date))
+          .map((n) => (
             <li
               key={n.id}
               className={`notification-item ${n.read ? "read" : "unread"}`}
@@ -86,7 +88,9 @@ const NotificationsPanel = ({ onClose }) => {
               <div className="notification-text">
                 <strong>{n.title}</strong>
                 <p>{n.message}</p>
-                <small>{new Date(n.creation_date).toLocaleDateString("es-CO")}</small>
+                <small>{new Date(n.creation_date).toLocaleDateString("es-CO", {
+                  timeZone: "UTC",
+                })}</small>
               </div>
               <div className="notification-actions">
                 {!n.read && (
