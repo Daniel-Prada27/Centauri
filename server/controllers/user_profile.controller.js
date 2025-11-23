@@ -69,6 +69,21 @@ export const readUserProfileById = async (req, res) => {
     }
 }
 
+export const readUserByEmail = async (req, res) => {
+    try {
+        // const userProfile = req.body
+        const userEmail = req.body.user_email
+        console.log(userEmail);
+        const result = await userProfileService.readUserByEmail(userEmail)
+        res.status(200).json(result)
+    } catch (error) {
+        if (error.statusCode) {
+            return res.status(error.statusCode).json({ message: error.message });
+        }
+        res.status(500).json({ message: 'Something went wrong!' });
+    }
+}
+
 export const updateUserProfile = async (req, res) => {
     try {
         const userProfile = req.body

@@ -14,10 +14,14 @@ userProfileRouter.get('/complete',
     ValidateSession.validateSession,
     controller.readWholeUser);
 
+userProfileRouter.get('/email',
+    ValidateSession.validateSession,
+    controller.readUserByEmail);
+
 userProfileRouter.get('/:id',
     ValidateSession.validateSession,
     controller.readUserProfileById);
-// Maybe change to /profile/:id ??
+
 userProfileRouter.get('',
     ValidateSession.validateSession,
     controller.readUserProfile);

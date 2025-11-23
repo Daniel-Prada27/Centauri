@@ -1,15 +1,15 @@
-import {PrismaClient} from '#server/generated/prisma/client.ts'
+import { PrismaClient } from '#server/generated/prisma/client.ts'
 import dotenv from 'dotenv'
 
-dotenv.config({path: '../.env'})
+dotenv.config({ path: '../.env' })
 
 
 const prisma = new PrismaClient()
 
-export const createUserProfile = async(userId, userProfileData) => {
+export const createUserProfile = async (userId, userProfileData) => {
     console.log(userProfileData);
     const exists = await prisma.user.findUnique({
-        where: {id: userId}
+        where: { id: userId }
     })
 
     if (!exists) {
@@ -18,15 +18,15 @@ export const createUserProfile = async(userId, userProfileData) => {
         throw error
     }
 
-    const userProfile = await prisma.user_Profile.create({data: userProfileData})
+    const userProfile = await prisma.user_Profile.create({ data: userProfileData })
 
     return userProfile
 
 }
 
-export const readUserProfile = async(userId) => {
+export const readUserProfile = async (userId) => {
     const exists = await prisma.user.findUnique({
-        where: {id: userId}
+        where: { id: userId }
     })
 
     if (!exists) {
@@ -53,9 +53,9 @@ export const readUserProfile = async(userId) => {
     return userProfile
 }
 
-export const readWholeUser = async(userId) => {
+export const readWholeUser = async (userId) => {
     const exists = await prisma.user.findUnique({
-        where: {id: userId}
+        where: { id: userId }
     })
 
     if (!exists) {
@@ -76,9 +76,9 @@ export const readWholeUser = async(userId) => {
     return userProfile
 }
 
-export const readUserProfileById = async(userId) => {
+export const readUserProfileById = async (userId) => {
     const exists = await prisma.user.findUnique({
-        where: {id: userId}
+        where: { id: userId }
     })
 
     if (!exists) {
@@ -105,10 +105,29 @@ export const readUserProfileById = async(userId) => {
     return userProfile
 }
 
-export const updateUserProfile = async(userId, userProfileData) => {
+export const readUserByEmail = async (userEmail) => {
+    const user = await prisma.user.findUnique({
+        where: {
+            email: userEmail
+        },
+        include: {
+            profile: true
+        }
+    })
+
+    if (!user) {
+        const error = new Error(`User doesn't exist`);
+        error.statusCode = 404;
+        throw error
+    }
+
+    return user
+}
+
+export const updateUserProfile = async (userId, userProfileData) => {
     console.log(userProfileData);
     const exists = await prisma.user.findUnique({
-        where: {id: userId}
+        where: { id: userId }
     })
 
     if (!exists) {
@@ -119,9 +138,9 @@ export const updateUserProfile = async(userId, userProfileData) => {
 
     const userProfile = await prisma.user_Profile.update({
         where: {
-            user_id : userId
+            user_id: userId
         },
-        data : {
+        data: {
             occupation: userProfileData.occupation || undefined,
             location: userProfileData.location || undefined,
             picture: userProfileData.picture || undefined
@@ -132,9 +151,9 @@ export const updateUserProfile = async(userId, userProfileData) => {
 
 }
 
-export const deleteUserProfile = async(userId) => {
+export const deleteUserProfile = async (userId) => {
     const exists = await prisma.user.findUnique({
-        where: {id: userId}
+        where: { id: userId }
     })
 
     if (!exists) {
