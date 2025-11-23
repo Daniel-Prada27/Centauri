@@ -14,7 +14,9 @@ function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [occupation, setOccupation] = useState("");
   const [location, setLocation] = useState("");
-  const [picture, setPicture] = useState("");
+  const [picture, setPicture] = useState(
+    "https://img.freepik.com/vector-premium/icono-perfil-avatar-predeterminado-imagen-usuario-redes-sociales-icono-avatar-gris-silueta-perfil-blanco-ilustracion-vectorial_561158-3485.jpg?w=360"
+  );
   const navigate = useNavigate();
 
   // ======================
@@ -51,15 +53,15 @@ function ProfilePage() {
     e.preventDefault();
 
     try {
-      const data = await createProfile({
+      await createProfile({
         occupation,
         location,
         picture
       });
-
+      const userData = await getProfile();
       alert("✅ Perfil creado correctamente");
-      setProfile(data);
-      setIsEditing(false);
+      setProfile(userData);
+      navigate("/teamspage");
     } catch (err) {
       console.error("Error creando perfil:", err);
       alert("Error al crear el perfil");
@@ -129,16 +131,12 @@ function ProfilePage() {
           />
 
           <label>Foto de perfil</label>
-            <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-            const file = e.target.files[0];
-            if (file) {
-            setPicture(file);
-            }
-            }}
-            />
+          <input
+            type="text"
+            placeholder="https://ejemplo.com/mi-foto.jpg"
+            value={picture}
+            onChange={(e) => setPicture(e.target.value)}
+          />
 
           <button type="submit">Crear perfil</button>
         </form>
