@@ -147,3 +147,10 @@
 .teams-manager-dialog::-webkit-scrollbar-thumb:hover {
   background: #7a869a;
 }
+
+.mini-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+}
