@@ -4,7 +4,6 @@ import Home from "./Pages/Home";
 import Login from "./Pages/Login";
 import ProfilePage from "./Pages/ProfilePage";
 import Register from "./Pages/Register";
-import Dashboard from "./Pages/Dashboard";
 import TeamsPage from "./Pages/TeamsPage";
 import BoardPage from "./Pages/BoardPage";
 import PublicRoute from "./Routes/PublicRoute";
@@ -21,7 +20,6 @@ function App() {
         <Route element={<PublicRoute />}>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/teamspage" element={<TeamsPage />} />
           <Route path="/boardpage/:id" element={<BoardPage />} />
           <Route path="/profile" element={<ProfilePage />} />

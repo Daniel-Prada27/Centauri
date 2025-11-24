@@ -41,12 +41,39 @@ export const readUserProfile = async (req, res) => {
     }
 }
 
+export const readWholeUser = async (req, res) => {
+    try {
+        const userId = req.session.user.id
+        const result = await userProfileService.readWholeUser(userId)
+        res.status(200).json(result)
+    } catch (error) {
+        if (error.statusCode) {
+            return res.status(error.statusCode).json({ message: error.message });
+        }
+        res.status(500).json({ message: 'Something went wrong!' });
+    }
+}
+
 export const readUserProfileById = async (req, res) => {
     try {
         // const userProfile = req.body
         const userId = req.params.id
         console.log(userId);
         const result = await userProfileService.readUserProfileById(userId)
+        res.status(200).json(result)
+    } catch (error) {
+        if (error.statusCode) {
+            return res.status(error.statusCode).json({ message: error.message });
+        }
+        res.status(500).json({ message: 'Something went wrong!' });
+    }
+}
+
+export const readUserByEmail = async (req, res) => {
+    try {
+        const userEmail = req.params.email
+        console.log(userEmail);
+        const result = await userProfileService.readUserByEmail(userEmail)
         res.status(200).json(result)
     } catch (error) {
         if (error.statusCode) {

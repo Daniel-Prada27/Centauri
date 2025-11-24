@@ -53,6 +53,9 @@ export const getProfile = () =>
 export const getUserProfile = (userId) =>
   makeRequest(`/profile/${userId}`, "GET");
 
+export const getUserProfilebyEmail = (email) =>
+  makeRequest(`/profile/email/${email}`, "GET");
+
 export const createProfile = (data) =>
   makeRequest("/profile", "POST", data);
 
