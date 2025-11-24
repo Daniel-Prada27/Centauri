@@ -25,13 +25,7 @@ calendarRouter.post('/events',
     controller.createCalendarEvent
 );
 
-// calendarRouter.put('/:taskId',
-//     ValidateSession.validateSession,
-//     SchemaValidation.validateTask,
-//     controller.updateTask
-// );
-
-// calendarRouter.delete('/:taskId',
-//     ValidateSession.validateSession,
-//     controller.deleteTask
-// );
+calendarRouter.delete('/events/:eventId',
+    ValidateSession.validateSession,
+    controller.deleteCalendarEvent
+);

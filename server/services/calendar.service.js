@@ -4,9 +4,9 @@ import { auth } from "#server/lib/auth.js"
 
 dotenv.config({ path: '../.env' })
 
-export const getCalendarList = async (req, res, next) => {
+export const getCalendarList = async (session) => {
 
-    const session = req.session.session
+    
     console.log("AA");
     console.log(session);
 
@@ -46,11 +46,8 @@ export const getCalendarList = async (req, res, next) => {
     }
 };
 
-export const getCalendarEvents = async (req, res, next) => {
+export const getCalendarEvents = async (session) => {
 
-    const session = req.session.session;
-    const user = req.session.user
-    const userEmail = user.email
 
     if (!session || !session.accessToken) {
         const error = new Error("No valid session or accessToken found");
@@ -90,9 +87,11 @@ export const getCalendarEvents = async (req, res, next) => {
     }
 };
 
-export const createCalendarEvent = async (req, res, next) => {
-    const { name, startDate, endDate } = req.body;  // Expecting `name`, `startDate`, and `endDate` from the request body
-    const session = req.session.session;
+export const createCalendarEvent = async (session, event) => {
+
+    const name = event.name
+    const startDate = event.startDate
+    const endDate = event.endDate
 
     if (!session || !session.accessToken) {
         const error = new Error("No valid session or accessToken found");
@@ -113,7 +112,7 @@ export const createCalendarEvent = async (req, res, next) => {
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
     // Prepare event data with name, start, and end date
-    const event = {
+    const newEvent = {
         summary: name,  // Event name
         start: {
             dateTime: new Date(startDate).toISOString(),  // ISO format for start date
@@ -129,7 +128,7 @@ export const createCalendarEvent = async (req, res, next) => {
         // Insert the event into the user's calendar
         const createdEvent = await calendar.events.insert({
             calendarId: 'primary', // 'primary' refers to the user's main calendar
-            resource: event,
+            resource: newEvent,
         });
 
         console.log("Event created:", createdEvent.data);
@@ -137,6 +136,42 @@ export const createCalendarEvent = async (req, res, next) => {
         return createdEvent.data
     } catch (error) {
         console.error("Error creating event:", error.message);
+        error.statusCode = 500;
+        throw error;
+    }
+};
+
+export const deleteCalendarEvent = async (session, eventId) => {
+
+    if (!session || !session.accessToken) {
+        const error = new Error("No valid session or accessToken found");
+        error.statusCode = 401;
+        throw error;
+    }
+
+    // Initialize OAuth2 client
+    const oauth2Client = new google.auth.OAuth2(
+        process.env.GOOGLE_CLIENT_ID,
+        process.env.GOOGLE_CLIENT_SECRET
+    );
+
+    oauth2Client.setCredentials({
+        access_token: session.accessToken,
+    });
+
+    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+
+    try {
+        // Delete the event using the eventId
+        await calendar.events.delete({
+            calendarId: 'primary',  // Use 'primary' for the user's main calendar
+            eventId: eventId,       // Pass the eventId of the event to be deleted
+        });
+
+        console.log(`Event with ID ${eventId} deleted successfully.`);
+        return
+    } catch (error) {
+        console.error("Error deleting event:", error.message);
         error.statusCode = 500;
         throw error;
     }
