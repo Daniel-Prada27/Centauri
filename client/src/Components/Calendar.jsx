@@ -58,28 +58,19 @@ export default function Calendar({ teamId }) {
             calendarApi.unselect();
 
         try {
-
-            let start = form.startTime
-            // let startDate = new Date(start);
-            // start = startDate.toISOString();
-
-            let end = form.endTime
-            // let endDate = new Date(end);
-            // end = endDate.toISOString();
-
             const eventBody = {
                 name: form.title,
-                startDate: start,
-                endDate: end,
+                startDate: form.startTime,
+                endDate: form.endTime,
                 teamId
                 ,
             };
 
             console.log(form)
-            console.log(start)
+            console.log(eventBody)
 
             await createEvent(eventBody);
-            fetchEvents();
+            await fetchEvents();
             setShowModal(false);
         } catch (err) {
             console.error("Error creating event:", err);
