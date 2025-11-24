@@ -112,7 +112,7 @@ const getModifiedTaskNotification = (teamId, taskName) => {
     const notification = {
         id_team: teamId,
         type: "Task",
-        title: "One of your tasks has chenged",
+        title: "One of your tasks has changed",
         message: `The task ${taskName} has been modified`,
         creation_date: currentDate,
         read: false
