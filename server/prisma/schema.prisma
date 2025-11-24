@@ -121,7 +121,7 @@ model Member {
     id_team String @db.Uuid
     role String @db.VarChar(30)
 
-    user User_Profile @relation(fields: [id_user], references: [user_id])
+    user User_Profile @relation(fields: [id_user], references: [user_id], onDelete: Cascade)
     team Team @relation(fields: [id_team], references: [id], onDelete: Cascade)
 
     @@id([id_user, id_team])
