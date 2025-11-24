@@ -33,6 +33,6 @@ userProfileRouter.put('',
     SchemaValidation.validateUserProfile,
     controller.updateUserProfile);
 
-userProfileRouter.delete('/delete-profile',
+userProfileRouter.delete('',
     ValidateSession.validateSession,
     controller.deleteUserProfile);

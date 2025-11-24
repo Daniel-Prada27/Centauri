@@ -6,6 +6,7 @@ import {
   getProfile,
   updateProfile,
   createProfile,
+  deleteProfile,
 } from "../utils/api";
 
 function ProfilePage() {
@@ -99,6 +100,28 @@ function ProfilePage() {
     }
   };
 
+  // ======================
+  //  Eliminar perfil (DELETE)
+  // ======================
+
+  const handleDeleteProfile = async () => {
+    if (!window.confirm("⚠️ Advertencia: ¿Seguro que quieres eliminar tu perfil?")) {
+      return;
+    }
+    if (!window.confirm("❗ Esta acción es permanente. ¿Deseas continuar?")) {
+      return;
+    }
+    try {
+      await deleteProfile();
+      alert("Perfil eliminado correctamente ❌");
+      navigate("/login"); // redirige al login luego de borrar la cuenta
+    } catch (err) {
+      console.error("Error eliminando perfil:", err);
+      alert("No se pudo eliminar el perfil");
+    }
+  };
+
+  //Para el ID
   const handleSpoilerClick = async () => {
     if (!showSpoilerId) {
       setShowSpoilerId(true);
@@ -121,7 +144,7 @@ function ProfilePage() {
   // ======================
   return (
     <div className="profile-page">
-      <h2>👤 Mi Perfil</h2>
+      <h2>Mi Perfil</h2>
 
       {/* Si no tiene perfil aún */}
       {!profile && (
@@ -196,7 +219,17 @@ function ProfilePage() {
           <p>💼 {profile.occupation || "Sin ocupación"}</p>
           <p>📍 {profile.location || "Sin ubicación"}</p>
 
-          <button onClick={() => setIsEditing(true)}>Editar perfil</button>
+          <button onClick={() => setIsEditing(true)}>⚙ Editar perfil</button>
+
+          {/* Boton para eliminar el user */}
+          <button 
+            className="delete-btn"
+            onClick={handleDeleteProfile}
+          >
+            🗑️ Eliminar perfil
+          </button>
+
+
           <button className="back-btn" onClick={() => navigate(-1)}>
             ⬅️ Volver
           </button>
