@@ -4,6 +4,7 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import { createEvent } from "../utils/api";
 
 export default function Calendar({ teamId }) {
   const [events, setEvents] = useState([]);
@@ -26,37 +27,52 @@ export default function Calendar({ teamId }) {
   // ------------------------------
   // Crear evento (selección de slot)
   // ------------------------------
-  const handleDateSelect = async (selectInfo) => {
-    const title = prompt("Título del evento:");
-    const calendarApi = selectInfo.view.calendar;
-    calendarApi.unselect();
 
-    if (!title) return;
+function parseTimeToDate(dateStr, timeStr) {
+  const [time, modifier] = timeStr.trim().split(" "); // "10:30", "AM"
+  let [hours, minutes] = time.split(":").map(Number);
 
-    try {
-      const res = await fetch("/api/calendar/events/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          start: selectInfo.startStr,
-          end: selectInfo.endStr,
-          teamId, // 👈 importante
-        }),
-      });
+  // Convert 12h → 24h
+  if (modifier.toUpperCase() === "PM" && hours !== 12) hours += 12;
+  if (modifier.toUpperCase() === "AM" && hours === 12) hours = 0;
 
-      const newEvent = await res.json();
+  return new Date(`${dateStr}T${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00`);
+}
 
-      calendarApi.addEvent({
-        id: newEvent.id,
-        title,
-        start: selectInfo.startStr,
-        end: selectInfo.endStr,
-      });
-    } catch (err) {
-      console.error("Error creating event:", err);
-    }
-  };
+const handleDateSelect = async (selectInfo) => {
+  const title = prompt("Título del evento:");
+  if (!title) return;
+
+  const startTime = prompt("Hora de inicio (HH:MM AM/PM):");
+  if (!startTime) return;
+
+  const endTime = prompt("Hora de finalización (HH:MM AM/PM):");
+  if (!endTime) return;
+
+  const calendarApi = selectInfo.view.calendar;
+  calendarApi.unselect();
+
+  try {
+    const dateStr = selectInfo.startStr.split("T")[0]; // "2025-11-24"
+
+    const startDate = parseTimeToDate(dateStr, startTime);
+    const endDate = parseTimeToDate(dateStr, endTime);
+
+    // RFC3339 string for Google Calendar
+    const eventBody = {
+      name: title,
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+    };
+
+    console.log(eventBody);
+    createEvent(eventBody);
+
+  } catch (err) {
+    console.error("Error creating event:", err);
+  }
+};
+
 
   // ------------------------------
   // Actualizar evento (drag/resize)

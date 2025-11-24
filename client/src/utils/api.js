@@ -3,6 +3,7 @@ import { authClient } from "../../../server/lib/auth-client.js";
 // Cliente genérico para llamadas HTTP
 export const makeRequest = async (endpoint, method, body, customHeaders = {}) => {
   try {
+    console.log(body);
     const response = await fetch(`http://localhost:3000${endpoint}`, {
       method,
       credentials: "include",
@@ -159,3 +160,12 @@ export const updateNotifications = (notificationId) =>
 
 export const deleteNotifications = (notificationId) =>
   makeRequest(`/notification/${notificationId}`, "DELETE");
+
+
+// ======================================================
+//  CALENDAR
+// ======================================================
+
+export const createEvent = (event) => {
+    makeRequest('/calendar/events', "POST", event)
+}
