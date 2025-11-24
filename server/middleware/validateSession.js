@@ -15,23 +15,33 @@ export const validateSession = async (req, res, next) => {
 
         console.log(session.session.userId);
         const userId = session.session.userId
+        session.session.accessToken = ''
 
-        const { accessToken } = await auth.api.getAccessToken({
-            body: {
-                providerId: "google", // or any other provider id
-                // accountId: "accountId", // optional, if you want to get the access token for a specific account
-                userId: userId, // optional, if you don't provide headers with authenticated token
-            },
-        })
+        try {
+            const { accessToken } = await auth.api.getAccessToken({
+                body: {
+                    providerId: "google", // or any other provider id
+                    // accountId: "accountId", // optional, if you want to get the access token for a specific account
+                    userId: userId, // optional, if you don't provide headers with authenticated token
+                },
+            })
+
+            session.session.accessToken = accessToken
+        } catch {
+            console.log();
+        }
+
+
+        console.log("HERE");
+
         // console.log("GOT IT");
-        session.session.accessToken = accessToken
+
 
 
 
         req.session = session;
         req.user_id = session.user.id;
         req.user = session.user;
-
         next();
 
     } catch (error) {
