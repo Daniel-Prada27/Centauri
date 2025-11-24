@@ -166,6 +166,10 @@ export const deleteNotifications = (notificationId) =>
 //  CALENDAR
 // ======================================================
 
-export const createEvent = (event) => {
-    makeRequest('/calendar/events', "POST", event)
+export const createEvent = async (event) => {
+    await makeRequest('/calendar/events', "POST", event)
+}
+
+export const getEvents = async () => {
+    return await makeRequest('/calendar/events', "GET")
 }

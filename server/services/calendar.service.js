@@ -6,7 +6,7 @@ dotenv.config({ path: '../.env' })
 
 export const getCalendarList = async (session) => {
 
-    
+
     console.log("AA");
     console.log(session);
 
@@ -77,8 +77,15 @@ export const getCalendarEvents = async (session) => {
         });
 
         const events = result.data.items || [];
-        console.log("Events:", events);
-        return events
+        const formatted = (events || []).map(ev => ({
+            id: ev.id,
+            title: ev.summary,                       // ← show the event name
+            start: ev.start.date || ev.start.dateTime,
+            end: ev.end.date || ev.end.dateTime,
+            url: ev.htmlLink,                        // ← make it clickable
+        }));
+        console.log("Events:", formatted);
+        return formatted
 
     } catch (error) {
         console.error("Error fetching events:", error.message);

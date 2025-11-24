@@ -449,7 +449,7 @@ function BoardPage() {
             >
               <option value="">Seleccionar...</option>
               {members
-                .filter((m) => m.role !== "pending")
+                .filter((m) => ((m.role !== "pending") && (m.role !== "viewer")))
                 .map((m) => (
                   <option key={m.id_user} value={m.id_user}>
                     {m.name}
