@@ -86,6 +86,12 @@ export default function Dashboard() {
         await makeRequest("/calendar/events", "POST", body);
     };
 
+    const deleteEvent = async (e) => {
+        e.preventDefault();
+        let eventId = 'usm7rjg6b6gcoeaofibpokchpc'
+        await makeRequest(`/calendar/events/${eventId}`, "DELETE");
+    };
+
     // -----------------------------
     // Formulario: Actualizar perfil
     // -----------------------------
@@ -282,6 +288,16 @@ export default function Dashboard() {
                         className="bg-red-500 hover:bg-red-600 text-white font-medium px-6 py-3 rounded-lg transition-colors"
                     >
                         CREATE EVENT
+                    </button>
+                </div>
+
+                {/* BOTÓN: EVENT DELETE */}
+                <div className="text-center pt-6">
+                    <button
+                        onClick={deleteEvent}
+                        className="bg-red-500 hover:bg-red-600 text-white font-medium px-6 py-3 rounded-lg transition-colors"
+                    >
+                        DELETE EVENT
                     </button>
                 </div>
 

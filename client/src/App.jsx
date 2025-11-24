@@ -8,6 +8,7 @@ import TeamsPage from "./Pages/TeamsPage";
 import BoardPage from "./Pages/BoardPage";
 import PublicRoute from "./Routes/PublicRoute";
 import PrivateRoute from "./Routes/PrivateRoute";
+import Dashboard from "./Pages/Dashboard";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="/teamspage" element={<TeamsPage />} />
           <Route path="/boardpage/:id" element={<BoardPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Route>
 
         {/* Rutas privadas: solo accesibles si SÍ estás logueado */}
