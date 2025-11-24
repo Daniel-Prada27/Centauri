@@ -6,6 +6,7 @@ import {
   getProfile,
   updateProfile,
   createProfile,
+  deleteProfile,
 } from "../utils/api";
 
 function ProfilePage() {
@@ -17,6 +18,7 @@ function ProfilePage() {
   const [picture, setPicture] = useState(
     "https://img.freepik.com/vector-premium/icono-perfil-avatar-predeterminado-imagen-usuario-redes-sociales-icono-avatar-gris-silueta-perfil-blanco-ilustracion-vectorial_561158-3485.jpg?w=360"
   );
+  const [showSpoilerId, setShowSpoilerId] = useState(false);
   const navigate = useNavigate();
 
   // ======================
@@ -98,14 +100,51 @@ function ProfilePage() {
     }
   };
 
-  if (loading) return <p>Cargando perfil...</p>;
+  // ======================
+  //  Eliminar perfil (DELETE)
+  // ======================
+
+  const handleDeleteProfile = async () => {
+    if (!window.confirm("⚠️ Advertencia: ¿Seguro que quieres eliminar tu perfil?")) {
+      return;
+    }
+    if (!window.confirm("❗ Esta acción es permanente. ¿Deseas continuar?")) {
+      return;
+    }
+    try {
+      await deleteProfile();
+      alert("Perfil eliminado correctamente ❌");
+      navigate("/login"); // redirige al login luego de borrar la cuenta
+    } catch (err) {
+      console.error("Error eliminando perfil:", err);
+      alert("No se pudo eliminar el perfil");
+    }
+  };
+
+  //Para el ID
+  const handleSpoilerClick = async () => {
+    if (!showSpoilerId) {
+      setShowSpoilerId(true);
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(profile.user_id);
+      alert("ID copiado al portapapeles!");
+    } catch (err) {
+      console.error("Error copiando:", err);
+      alert("No se pudo copiar ❌");
+    }
+  };
+
+  if (loading) return null;
 
   // ======================
   //  Render
   // ======================
   return (
     <div className="profile-page">
-      <h2>👤 Mi Perfil</h2>
+      <h2>Mi Perfil</h2>
 
       {/* Si no tiene perfil aún */}
       {!profile && (
@@ -144,28 +183,59 @@ function ProfilePage() {
 
       {/* Si ya tiene perfil */}
       {profile && !isEditing && (
-  <div className="profile-info">
-    <img
-      src={
-        profile.picture && profile.picture !== "pfp/juan"
-          ? profile.picture
-          : "https://img.freepik.com/vector-premium/icono-perfil-avatar-predeterminado-imagen-usuario-redes-sociales-icono-avatar-gris-silueta-perfil-blanco-ilustracion-vectorial_561158-3485.jpg?w=360"
-      }
-      alt="Foto de perfil"
-    />
+        <div className="profile-info">
+          <img
+            src={
+              profile.picture && profile.picture !== "pfp/juan"
+                ? profile.picture
+                : "https://img.freepik.com/vector-premium/icono-perfil-avatar-predeterminado-imagen-usuario-redes-sociales-icono-avatar-gris-silueta-perfil-blanco-ilustracion-vectorial_561158-3485.jpg?w=360"
+            }
+            alt="Foto de perfil"
+          />
+          
+          {/* Spoiler del user_id */}
+          <div
+            onClick={handleSpoilerClick}
+            style={{
+              marginTop: "10px",
+              padding: "6px 10px",
+              background: "#eee",
+              borderRadius: "5px",
+              cursor: "pointer",
+              userSelect: "none",
+              fontSize: "0.9rem"
+            }}
+          >
+            {showSpoilerId ? (
+              <span>ID usuario: {profile.user_id}</span>
+            ) : (
+              <span>⚠️ Click para mostrar ID personal</span>
+              
+            )}
+          </div>
 
-    <h3>{profile.user?.name || "Nombre no disponible"}</h3>
-    <p>📧 {profile.user?.email || "Sin correo"}</p>
-    <p>💼 {profile.occupation || "Sin ocupación"}</p>
-    <p>📍 {profile.location || "Sin ubicación"}</p>
+          <h3>{profile.user?.name || "Nombre no disponible"}</h3>
+          <p>📧 {profile.user?.email || "Sin correo"}</p>
+          <p>💼 {profile.occupation || "Sin ocupación"}</p>
+          <p>📍 {profile.location || "Sin ubicación"}</p>
 
-    <button onClick={() => setIsEditing(true)}>Editar perfil</button>
-    <button className="back-btn" onClick={() => navigate(-1)}>
-      ⬅️ Volver
-    </button>
+          <button onClick={() => setIsEditing(true)}>⚙ Editar perfil</button>
 
-  </div>
-)}
+          {/* Boton para eliminar el user */}
+          <button 
+            className="delete-btn"
+            onClick={handleDeleteProfile}
+          >
+            🗑️ Eliminar perfil
+          </button>
+
+
+          <button className="back-btn" onClick={() => navigate(-1)}>
+            ⬅️ Volver
+          </button>
+
+        </div>
+      )}
 
 
       {/* Formulario de edición */}
