@@ -435,7 +435,7 @@ function BoardPage() {
               onChange={(e) => setTaskResponsible(e.target.value)}
             >
               <option value="">Seleccionar...</option>
-              {members.map((m) => (
+              {members.filter(m => m.role !== "pending").map((m) => (
                 <option key={m.id_user} value={m.id_user}>
                   {m.name}
                 </option>
