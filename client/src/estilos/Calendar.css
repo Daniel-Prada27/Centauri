@@ -1,0 +1,132 @@
+/* ===============================
+   OVERLAY DEL MODAL DE CALENDARIO
+================================= */
+.calendar-overlay {
+  position: fixed;
+  inset: 0; /* top:0, right:0, bottom:0, left:0 */
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+
+  opacity: 0;
+  animation: fadeInOverlay 0.25s forwards;
+}
+
+/* ===============================
+   CONTENEDOR DEL CALENDARIO
+================================= */
+.calendar-dialog {
+  width: 90%;
+  height: 90%;
+  max-width: 1100px;
+  max-height: 800px;
+
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+
+  transform: scale(0.95);
+  opacity: 0;
+  animation: zoomInDialog 0.2s forwards;
+  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.18);
+}
+
+/* Botón de cierre */
+.calendar-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  border: none;
+  background: transparent;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #333;
+  transition: 0.2s ease;
+}
+
+.calendar-close:hover {
+  color: #ff4444;
+  transform: scale(1.15);
+}
+
+/* ===============================
+   CALENDARIO INTERNO
+================================= */
+.calendar-dialog .fc {
+  height: 100% !important;
+  width: 100%;
+}
+
+/* Ajuste interno para que no se rompa el layout */
+.calendar-dialog .fc-view-harness {
+  height: calc(100% - 10px) !important;
+}
+
+/* ===============================
+   ESTILOS DE SCROLL SUAVE
+================================= */
+.calendar-dialog::-webkit-scrollbar {
+  width: 10px;
+}
+
+.calendar-dialog::-webkit-scrollbar-thumb {
+  background: #c8c8c8;
+  border-radius: 10px;
+}
+
+.calendar-dialog::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* ===============================
+   ANIMACIONES
+================================= */
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes zoomInDialog {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ===============================
+   RESPONSIVE
+================================= */
+@media (max-width: 768px) {
+  .calendar-dialog {
+    width: 95%;
+    height: 92%;
+    padding: 10px;
+  }
+
+  .calendar-close {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendar-dialog {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+  }
+}
