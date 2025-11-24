@@ -20,7 +20,9 @@ export const auth = betterAuth({
                 "openid",
                 "email",
                 "profile",
-                "https://www.googleapis.com/auth/calendar",            // or a more limited Calendar scope
+                "https://www.googleapis.com/auth/calendar",
+                "https://www.googleapis.com/auth/calendar.app.created",
+                "https://www.googleapis.com/auth/calendar.freebusy"
             ],
             accessType: "offline",            // very important: you need a refresh token
             prompt: "select_account consent", // ensures refresh token is granted

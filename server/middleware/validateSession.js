@@ -1,5 +1,8 @@
 import { auth } from "#server/lib/auth.js";
 
+
+
+
 export const validateSession = async (req, res, next) => {
     try {
         const session = await auth.api.getSession({
@@ -7,7 +10,21 @@ export const validateSession = async (req, res, next) => {
         });
 
         if (session) {
+            
+            console.log(session.session.userId);
+            const userId = session.session.userId
+
+            const { accessToken } = await auth.api.getAccessToken({
+                body: {
+                    providerId: "google", // or any other provider id
+                    // accountId: "accountId", // optional, if you want to get the access token for a specific account
+                    userId: userId, // optional, if you don't provide headers with authenticated token
+                },
+            })
+            // console.log("GOT IT");
+            session.session.accessToken = accessToken
             req.session = session;
+            // console.log(req.session);
             next();
         } else {
             return res.status(401).json({ message: "No valid session found." });

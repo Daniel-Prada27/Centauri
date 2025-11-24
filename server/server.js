@@ -9,6 +9,7 @@ import {teamRouter} from '#server/routes/team.routes.js'
 import {memberRouter} from '#server/routes/member.routes.js'
 import {taskRouter} from '#server/routes/task.routes.js'
 import {notificationRouter} from '#server/routes/notification.routes.js'
+import { calendarRouter } from './routes/calendar.routes.js';
 
 const corsOptions = {
     origin: ["http://localhost:5173", "http://localhost:8080"],
@@ -28,6 +29,7 @@ app.use('/team', teamRouter);
 app.use('/member', memberRouter);
 app.use('/task', taskRouter);
 app.use('/notification', notificationRouter);
+app.use('/calendar', calendarRouter);
 
 app.get('/api', (req, res) => {
     res.json({"users": ["Jaime", "Sara", "Prada"]})
