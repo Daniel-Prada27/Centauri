@@ -68,6 +68,24 @@ export default function Dashboard() {
         await makeRequest("/team", "POST", team);
     };
 
+    const getCalendarList = async (e) => {
+        e.preventDefault();
+        await makeRequest("/calendar", "GET");
+    };
+    const getEventList = async (e) => {
+        e.preventDefault();
+        await makeRequest("/calendar/events", "GET");
+    };
+    const postEvent = async (e) => {
+        e.preventDefault();
+        let body = {
+            "name": "Team Meeting",
+            "startDate": "2025-11-30T09:00:00",  // ISO 8601 format (YYYY-MM-DDTHH:mm:ss)
+            "endDate": "2025-11-30T10:00:00"     // ISO 8601 format (YYYY-MM-DDTHH:mm:ss)
+        }
+        await makeRequest("/calendar/events", "POST", body);
+    };
+
     // -----------------------------
     // Formulario: Actualizar perfil
     // -----------------------------
@@ -235,6 +253,35 @@ export default function Dashboard() {
                         className="bg-red-500 hover:bg-red-600 text-white font-medium px-6 py-3 rounded-lg transition-colors"
                     >
                         Sign Out
+                    </button>
+                </div>
+                {/* BOTÓN: CALENDAR LIST */}
+                <div className="text-center pt-6">
+                    <button
+                        onClick={getCalendarList}
+                        className="bg-red-500 hover:bg-red-600 text-white font-medium px-6 py-3 rounded-lg transition-colors"
+                    >
+                        CalendarList
+                    </button>
+                </div>
+
+                {/* BOTÓN: EVENT LIST */}
+                <div className="text-center pt-6">
+                    <button
+                        onClick={getEventList}
+                        className="bg-red-500 hover:bg-red-600 text-white font-medium px-6 py-3 rounded-lg transition-colors"
+                    >
+                        EventList
+                    </button>
+                </div>
+
+                {/* BOTÓN: EVENT CREATE */}
+                <div className="text-center pt-6">
+                    <button
+                        onClick={postEvent}
+                        className="bg-red-500 hover:bg-red-600 text-white font-medium px-6 py-3 rounded-lg transition-colors"
+                    >
+                        CREATE EVENT
                     </button>
                 </div>
 
