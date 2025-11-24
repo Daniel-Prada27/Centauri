@@ -257,8 +257,11 @@ export default function Calendar({ teamId }) {
     // ---------------------------------------------------------
     const handleEventClick = (info) => {
         if (info.event.url) {
-            // Let the default action open the link.
-            return;
+            if (info.event.url) {
+                info.jsEvent.preventDefault();        // Prevent same-page navigation
+                window.open(info.event.url, "_blank", "noopener,noreferrer");
+                return;
+            }
         }
 
         // If the event has no link, fallback to delete logic:
