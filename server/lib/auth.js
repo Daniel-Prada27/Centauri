@@ -25,7 +25,7 @@ export const auth = betterAuth({
                 "https://www.googleapis.com/auth/calendar.freebusy"
             ],
             accessType: "offline",            // very important: you need a refresh token
-            prompt: "select_account consent", // ensures refresh token is granted
+            prompt: "select_account", // ensures refresh token is granted
         },
     },
     emailAndPassword: {
