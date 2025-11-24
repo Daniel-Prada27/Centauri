@@ -11,7 +11,6 @@ import {
   createTeam,
   acceptInvite,
   rejectInvite,
-  makeRequest,
   signOut
 } from "../utils/api"
 
@@ -24,9 +23,6 @@ function TeamsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [teamName, setTeamName] = useState("");
   const [teamDescription, setTeamDescription] = useState("");
-
-  const [showJoinModal, setShowJoinModal] = useState(false);
-  const [joinCode, setjoinCode] = useState("");
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -97,21 +93,6 @@ function TeamsPage() {
     }
   };
 
-  // Unirse a equipo, falta por arreglar
-  const handleJoinTeam = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await makeRequest("/member/invite/join", "POST", {
-        id_team: joinCode,
-      });
-
-      alert("Solicitud enviada");
-      setShowJoinModal(false);
-    } catch (err) {
-      alert("Error al unirse al equipo");
-    }
-  };
-
   // Aceptar / Rechazar
   const handleAcceptInvite = async (teamId) => {
     await acceptInvite(teamId, user.user_id);
@@ -122,20 +103,6 @@ function TeamsPage() {
   const handleRejectInvite = async (teamId) => {
     await rejectInvite(teamId, user.user_id);
     await loadData();
-  };
-
-  // Abrir el modal de editar
-  const handleOpenEdit = (team) => {
-    setSelectedTeam(team);
-    setEditName(team.name);
-    setEditDescription(team.description);
-    setShowEditModal(true);
-  };
-
-  // Abrir el modal de eliminar
-  const handleOpenDelete = (team) => {
-    setSelectedTeam(team);
-    setShowDeleteModal(true);
   };
 
   // Update team

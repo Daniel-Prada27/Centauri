@@ -11,7 +11,6 @@ import {
   createTeam,
   acceptInvite,
   rejectInvite,
-  makeRequest
 } from "../utils/api";
 
 export default function TeamsSidebar() {
@@ -23,9 +22,6 @@ export default function TeamsSidebar() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [teamName, setTeamName] = useState("");
   const [teamDescription, setTeamDescription] = useState("");
-
-  const [showJoinModal, setShowJoinModal] = useState(false);
-  const [joinCode, setjoinCode] = useState("");
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -92,22 +88,6 @@ export default function TeamsSidebar() {
       navigate(`/boardpage/${newTeam.id}`);
     } catch {
       alert("Error al crear equipo");
-    }
-  };
-
-  // Unirse a equipo
-  const handleJoinTeam = async (e) => {
-    e.preventDefault();
-
-    try {
-      await makeRequest("/member/invite/join", "POST", {
-        id_team: joinCode,
-      });
-
-      alert("Solicitud enviada");
-      setShowJoinModal(false);
-    } catch {
-      alert("Error al unirse al equipo");
     }
   };
 
