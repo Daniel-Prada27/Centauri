@@ -71,8 +71,7 @@ export const readUserProfileById = async (req, res) => {
 
 export const readUserByEmail = async (req, res) => {
     try {
-        // const userProfile = req.body
-        const userEmail = req.body.user_email
+        const userEmail = req.params.email
         console.log(userEmail);
         const result = await userProfileService.readUserByEmail(userEmail)
         res.status(200).json(result)

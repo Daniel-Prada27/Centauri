@@ -14,7 +14,7 @@ userProfileRouter.get('/complete',
     ValidateSession.validateSession,
     controller.readWholeUser);
 
-userProfileRouter.get('/email',
+userProfileRouter.get('/email/:email',
     ValidateSession.validateSession,
     controller.readUserByEmail);
 
