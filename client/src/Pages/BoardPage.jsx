@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import "../estilos/BoardPage.css";
 import TeamsSidebar from "../Components/TeamsSidebar";
 import MembersManagerModal from "../Components/MembersManagerModal";
-import NotificationsPanel from "../Components/NotificationsPanel"; // 👈 nuevo import
+import NotificationsPanel from "../Components/NotificationsPanel";
+import Calendar from "../Components/Calendar"; // ⬅️ IMPORTANTE
+
 import { useParams, useNavigate } from "react-router-dom";
 
 import {
@@ -30,13 +32,16 @@ function BoardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Estados de modales
+  // Modales
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showMembersModal, setShowMembersModal] = useState(false);
   const [showTeamsManager, setShowTeamsManager] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false); // 👈 nuevo estado
+  const [showNotifications, setShowNotifications] = useState(false);
 
-  // Estados del formulario de tarea
+  // Calendario
+  const [showCalendar, setShowCalendar] = useState(false);
+
+  // Formulario de tareas
   const [taskName, setTaskName] = useState("");
   const [taskType, setTaskType] = useState("business");
   const [taskResponsible, setTaskResponsible] = useState("");
@@ -52,9 +57,9 @@ function BoardPage() {
     { key: "completed", label: "Completado" },
   ];
 
-  // ===========================
-  //   Cargar datos del tablero
-  // ===========================
+  // ===========================================
+  // Cargar tablero
+  // ===========================================
   const loadBoardData = async () => {
     try {
       setLoading(true);
@@ -80,6 +85,7 @@ function BoardPage() {
 
       setTeam(currentTeam);
 
+      // Cargar miembros
       const rawMembers = await getTeamMembers(currentTeam.id);
 
       const cache = { ...profilesCache };
@@ -113,6 +119,7 @@ function BoardPage() {
       setProfilesCache(cache);
       setMembers(membersWithProfiles);
 
+      // Cargar tareas
       const taskList = await getTeamTasks(currentTeam.id);
       setTasks(taskList);
     } catch (err) {
@@ -127,9 +134,9 @@ function BoardPage() {
     loadBoardData();
   }, [id]);
 
-  // ===========================
-  //   Invitar usuario
-  // ===========================
+  // ===========================================
+  // Invitar usuario
+  // ===========================================
   const handleInviteUser = async (e) => {
     e.preventDefault();
 
@@ -156,9 +163,9 @@ function BoardPage() {
     }
   };
 
-  // ===========================
-  //   Crear tarea
-  // ===========================
+  // ===========================================
+  // Crear tarea
+  // ===========================================
   const handleAddTask = async (e) => {
     if (e) e.preventDefault();
 
@@ -191,11 +198,11 @@ function BoardPage() {
     }
   };
 
-  // ===========================
-  //   Actualizar tarea
-  // ===========================
+  // ===========================================
+  // Actualizar tarea
+  // ===========================================
   const toggleTask = (id) => {
-  setOpenTask((prev) => (prev === id ? null : id));
+    setOpenTask((prev) => (prev === id ? null : id));
   };
 
   const handleTaskUpdate = async (taskId, updates) => {
@@ -220,9 +227,9 @@ function BoardPage() {
     }
   };
 
-  // ===========================
-  //   Eliminar tarea
-  // ===========================
+  // ===========================================
+  // Eliminar tarea
+  // ===========================================
   const handleDeleteTask = async (taskId) => {
     if (!window.confirm("¿Eliminar esta tarea?")) return;
 
@@ -234,34 +241,37 @@ function BoardPage() {
     }
   };
 
-  // ===========================
-  //   Cerrar sesión
-  // ===========================
+  // ===========================================
+  // Logout
+  // ===========================================
   const handleLogout = () => {
     signOut(navigate);
   };
 
-  if (loading) return   <div className="loader-container"><div className="spinner"></div></div>;
+  if (loading)
+    return (
+      <div className="loader-container">
+        <div className="spinner"></div>
+      </div>
+    );
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
-  // Para los nombres
+  // Helpers
   const getResponsibleName = (userId) => {
     if (!userId) return "Sin responsable";
     if (profilesCache[userId]?.user?.name) return profilesCache[userId].user.name;
     const m = members.find((x) => x.id_user === userId);
     return m?.name || "Sin responsable";
   };
-  
-  // Para las imagenes
+
   const getResponsiblePicture = (userId) => {
-  const member = members.find(m => m.id_user === userId);
-  return member?.picture || "/default_profile.png";
+    const member = members.find((m) => m.id_user === userId);
+    return member?.picture || "/default_profile.png";
   };
 
-
-  // ===========================
-  //   RENDER
-  // ===========================
+  // ===========================================
+  // RENDER
+  // ===========================================
   return (
     <div className="board-page-root">
       <div className="board-container">
@@ -270,15 +280,12 @@ function BoardPage() {
           <div className="board-header-info">
             <h2>{team?.name}</h2>
             <p className="user-line">
-              <img
-                src={user?.picture}
-                alt="pfp"
-                className="mini-avatar"
-              />
+              <img src={user?.picture} alt="pfp" className="mini-avatar" />
               {user?.name}
             </p>
           </div>
 
+          {/* INVITAR USUARIO */}
           <div className="invite-section">
             <input
               type="text"
@@ -289,15 +296,19 @@ function BoardPage() {
             <button onClick={handleInviteUser}>✉️ Enviar invitación</button>
           </div>
 
+          {/* ACCIONES DEL HEADER */}
           <div className="header-actions">
-            {/* 🔔 Notificaciones */}
             <button onClick={() => setShowNotifications(!showNotifications)}>
-              🔔 
+              🔔
             </button>
-            {showNotifications && (<NotificationsPanel onClose={() => setShowNotifications(false)} />)}
+            {showNotifications && (
+              <NotificationsPanel
+                onClose={() => setShowNotifications(false)}
+              />
+            )}
 
             <button className="add-task" onClick={() => setShowCreateForm(true)}>
-               Crear tarea
+              Crear tarea
             </button>
 
             <button onClick={() => setShowMembersModal(true)}>
@@ -309,7 +320,7 @@ function BoardPage() {
               type="button"
               onClick={() => setShowTeamsManager(true)}
             >
-               Gestor de equipos
+              Gestor de equipos
             </button>
 
             <button className="profile-btn" onClick={() => navigate("/profile")}>
@@ -317,7 +328,7 @@ function BoardPage() {
             </button>
 
             <button className="logout" onClick={handleLogout}>
-               Cerrar sesión
+              Cerrar sesión
             </button>
           </div>
         </div>
@@ -327,25 +338,25 @@ function BoardPage() {
           {statuses.map((st) => (
             <div key={st.key} className="kanban-column">
               <h3>{st.label}</h3>
+
               {tasks
                 .filter((t) => t.status === st.key)
                 .map((t) => (
-
                   <div key={t.id} className="kanban-card">
-
-                    {/* CABECERA / PARTE SIEMPRE VISIBLE */}
-                    <div className="task-header" onClick={() => toggleTask(t.id)}>
+                    <div
+                      className="task-header"
+                      onClick={() => toggleTask(t.id)}
+                    >
                       <div>
                         <p className="task-title">{t.name}</p>
                         <small>
-                          🗓️ {new Date(t.due_date).toLocaleDateString()}
-
+                          🗓️{" "}
+                          {new Date(t.due_date).toLocaleDateString("es-CO")}
                           <div className="responsible-info">
                             <img
                               src={getResponsiblePicture(t.id_responsible)}
-                              alt="profile"
                               className="mini-avatar"
-                              style={{ marginRight: "8px" }}
+                              alt="resp"
                             />
                             {getResponsibleName(t.id_responsible)}
                           </div>
@@ -357,16 +368,16 @@ function BoardPage() {
                       </button>
                     </div>
 
-                    {/* SECCIÓN DESPLEGABLE */}
                     {openTask === t.id && (
                       <div className="task-details">
-
                         <div className="dropdown-group">
                           <label>Estado:</label>
                           <select
                             value={t.status}
                             onChange={(e) =>
-                              handleTaskUpdate(t.id, { status: e.target.value })
+                              handleTaskUpdate(t.id, {
+                                status: e.target.value,
+                              })
                             }
                           >
                             <option value="pending">Pendiente</option>
@@ -380,7 +391,9 @@ function BoardPage() {
                           <select
                             value={t.priority}
                             onChange={(e) =>
-                              handleTaskUpdate(t.id, { priority: e.target.value })
+                              handleTaskUpdate(t.id, {
+                                priority: e.target.value,
+                              })
                             }
                           >
                             <option value="low">Baja</option>
@@ -395,17 +408,13 @@ function BoardPage() {
                         >
                           🗑️
                         </button>
-
                       </div>
                     )}
-
                   </div>
-
                 ))}
             </div>
           ))}
         </div>
-        
       </div>
 
       {/* MODAL CREAR TAREA */}
@@ -413,6 +422,7 @@ function BoardPage() {
         <div className="modal-overlay">
           <div className="modal">
             <h3>Crear nueva tarea</h3>
+
             <label>Nombre de la tarea</label>
             <input
               type="text"
@@ -422,7 +432,10 @@ function BoardPage() {
             />
 
             <label>Tipo de tarea</label>
-            <select value={taskType} onChange={(e) => setTaskType(e.target.value)}>
+            <select
+              value={taskType}
+              onChange={(e) => setTaskType(e.target.value)}
+            >
               <option value="business">Business</option>
               <option value="technical">Technical</option>
               <option value="design">Design</option>
@@ -435,11 +448,13 @@ function BoardPage() {
               onChange={(e) => setTaskResponsible(e.target.value)}
             >
               <option value="">Seleccionar...</option>
-              {members.filter(m => m.role !== "pending").map((m) => (
-                <option key={m.id_user} value={m.id_user}>
-                  {m.name}
-                </option>
-              ))}
+              {members
+                .filter((m) => m.role !== "pending")
+                .map((m) => (
+                  <option key={m.id_user} value={m.id_user}>
+                    {m.name}
+                  </option>
+                ))}
             </select>
 
             <label>Fecha de vencimiento</label>
@@ -451,7 +466,9 @@ function BoardPage() {
 
             <div className="modal-actions">
               <button onClick={handleAddTask}>Crear</button>
-              <button onClick={() => setShowCreateForm(false)}>Cancelar</button>
+              <button onClick={() => setShowCreateForm(false)}>
+                Cancelar
+              </button>
             </div>
           </div>
         </div>
@@ -478,15 +495,43 @@ function BoardPage() {
         </div>
       )}
 
-      {/* MODAL GESTOR DE MIEMBROS */} 
+      {/* MODAL GESTOR DE MIEMBROS */}
       {showMembersModal && (
         <MembersManagerModal
           teamId={team.id}
           initialMembers={members}
-          onClose={async () => {
-            setShowMembersModal(false);
-          }}
+          onClose={() => setShowMembersModal(false)}
         />
+      )}
+
+      {/* BOTÓN FLOTANTE DEL CALENDARIO */}
+      <button
+        className="floating-calendar-btn"
+        onClick={() => setShowCalendar(true)}
+      >
+        📅
+      </button>
+
+      {/* MODAL CALENDARIO */}
+      {showCalendar && (
+        <div
+          className="calendar-overlay"
+          onClick={() => setShowCalendar(false)}
+        >
+          <div
+            className="calendar-dialog"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="calendar-close"
+              onClick={() => setShowCalendar(false)}
+            >
+              ✕
+            </button>
+
+            <Calendar />
+          </div>
+        </div>
       )}
     </div>
   );
