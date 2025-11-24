@@ -164,7 +164,7 @@ function TeamsPage() {
 
           {openInvites && (
             <div className="accordion-content">
-              {invitations === null ? (
+              {(invitations === null || invitations.length === 0) ? (
                 <p className="empty-text">No tienes invitaciones pendientes.</p>
               ) : (
                 invitations.map(inv => (
