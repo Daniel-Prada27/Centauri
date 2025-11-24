@@ -122,7 +122,7 @@ model Member {
     role String @db.VarChar(30)
 
     user User_Profile @relation(fields: [id_user], references: [user_id])
-    team Team @relation(fields: [id_team], references: [id])
+    team Team @relation(fields: [id_team], references: [id], onDelete: Cascade)
 
     @@id([id_user, id_team])
     @@schema("public")
@@ -139,7 +139,7 @@ model Task {
     due_date       DateTime @db.Date //Debe pasasrse como objeto Date() por un bug (documentacion)
 
     team        Team @relation(fields: [id_team], references: [id], onDelete: Cascade)
-    responsible User_Profile @relation(fields: [id_responsible], references: [user_id])
+    responsible User_Profile @relation(fields: [id_responsible], references: [user_id], onDelete: SetNull)
 
     Subtasks Subtask[]
     Comment  Comment[]
@@ -169,7 +169,7 @@ model Comment {
     content   String  @db.VarChar(300)
 
     task   Task @relation(fields: [id_task], references: [id], onDelete: Cascade)
-    author User_Profile @relation(fields: [id_author], references: [user_id])
+    author User_Profile @relation(fields: [id_author], references: [user_id], onDelete: SetNull)
 
     @@schema("public")
 }
@@ -183,7 +183,7 @@ model Event {
     due_date    DateTime @db.Date
 
     team   Team @relation(fields: [id_team], references: [id], onDelete: Cascade)
-    author User_Profile @relation("EventAuthor", fields: [id_author], references: [user_id])
+    author User_Profile @relation("EventAuthor", fields: [id_author], references: [user_id], onDelete: SetNull)
 
     Members User_Profile[]
 
@@ -200,7 +200,7 @@ model Notification {
     creation_date DateTime @db.Date
     read          Boolean @default(false)
 
-    team Team @relation(fields: [id_team], references: [id])
+    team Team @relation(fields: [id_team], references: [id], onDelete: Cascade)
 
     members NotificationMember[]
 
