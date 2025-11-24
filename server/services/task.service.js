@@ -104,6 +104,25 @@ const getAssignedTaskNotification = (teamId, taskName) => {
 
 }
 
+const getModifiedTaskNotification = (teamId, taskName) => {
+
+    let currentDate = new Date();
+    // currentDate = currentDate.toISOString().split('T')[0]
+
+    const notification = {
+        id_team: teamId,
+        type: "Task",
+        title: "One of your tasks has chenged",
+        message: `The task ${taskName} has been modified`,
+        creation_date: currentDate,
+        read: false
+    }
+
+    return notification
+
+}
+
+
 export const createTask = async (userId, task) => {
     console.log(task);
 
@@ -211,7 +230,7 @@ export const updateTask = async (userId, taskId, task) => {
     updatedTask.due_date = updatedTask.due_date.toISOString().split('T')[0]
     console.log(updatedTask);
 
-    const notification = getAssignedTaskNotification(updatedTask.id_team, updatedTask.name)
+    const notification = getModifiedTaskNotification(updatedTask.id_team, updatedTask.name)
 
     await createNotification(notification, [updatedTask.id_responsible]);
 
