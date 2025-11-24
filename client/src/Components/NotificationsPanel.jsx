@@ -119,7 +119,7 @@ const NotificationsPanel = ({ onClose }) => {
                 <strong>{n.title}</strong>
                 <p>{n.message}</p>
                 <small>{new Date(n.creation_date).toLocaleDateString("es-CO", {
-                  timeZone: "UTC",
+                  timeZone: "America/Bogota",
                 })}</small>
               </div>
 
