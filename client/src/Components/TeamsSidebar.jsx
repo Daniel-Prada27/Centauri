@@ -17,7 +17,7 @@ export default function TeamsSidebar() {
   const [user, setUser] = useState(null);
   const [teams, setTeams] = useState([]);
 
-  const [invitations, setInvitations] = useState(null);
+  const [invitations, setInvitations] = useState([]);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [teamName, setTeamName] = useState("");
