@@ -216,7 +216,7 @@ function BoardPage() {
       setTasks(refreshed);
     } catch (err) {
       console.error(err);
-      setError("No se pudo actualizar la tarea");
+      alert("No se pudo actualizar la tarea");
     }
   };
 
