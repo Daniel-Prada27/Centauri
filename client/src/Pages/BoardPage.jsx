@@ -9,6 +9,7 @@ import {
   signOut,
   getProfile,
   getUserProfile,
+  getUserProfilebyEmail,
   getTeamMembers,
   getTeams,
   getTeamTasks,
@@ -131,14 +132,27 @@ function BoardPage() {
   // ===========================
   const handleInviteUser = async (e) => {
     e.preventDefault();
-    if (!inviteUserId.trim()) return alert("Ingresa un ID válido");
+
+    const input = inviteUserId.trim();
+    if (!input) return alert("Ingresa un correo o un ID");
+
+    let finalUserId = input;
 
     try {
-      await inviteUser(team.id, inviteUserId.trim());
-      alert("Invitación enviada");
+      if (input.includes("@")) {
+        const profile = await getUserProfilebyEmail(input);
+
+        if (!profile || !profile.id)
+          return alert("No existe un usuario con ese correo");
+
+        finalUserId = profile.id;
+      }
+      await inviteUser(team.id, finalUserId);
+      alert("Invitación enviada correctamente");
       setInviteUserId("");
     } catch (err) {
-      alert("Error enviando invitación");
+      console.error(err);
+      alert("Error al enviar invitación");
     }
   };
 
@@ -202,7 +216,7 @@ function BoardPage() {
       setTasks(refreshed);
     } catch (err) {
       console.error(err);
-      setError("No se pudo actualizar la tarea");
+      alert("No se pudo actualizar la tarea");
     }
   };
 
@@ -268,7 +282,7 @@ function BoardPage() {
           <div className="invite-section">
             <input
               type="text"
-              placeholder="ID de usuario a invitar..."
+              placeholder="ID o correo de usuario..."
               value={inviteUserId}
               onChange={(e) => setInviteUserId(e.target.value)}
             />
@@ -421,7 +435,7 @@ function BoardPage() {
               onChange={(e) => setTaskResponsible(e.target.value)}
             >
               <option value="">Seleccionar...</option>
-              {members.map((m) => (
+              {members.filter(m => m.role !== "pending").map((m) => (
                 <option key={m.id_user} value={m.id_user}>
                   {m.name}
                 </option>
@@ -464,6 +478,7 @@ function BoardPage() {
         </div>
       )}
 
+      {/* MODAL GESTOR DE MIEMBROS */} 
       {showMembersModal && (
         <MembersManagerModal
           teamId={team.id}

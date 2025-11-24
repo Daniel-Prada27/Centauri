@@ -11,7 +11,6 @@ import {
   createTeam,
   acceptInvite,
   rejectInvite,
-  makeRequest,
   signOut
 } from "../utils/api"
 
@@ -19,14 +18,11 @@ function TeamsPage() {
   const [user, setUser] = useState(null);
   const [teams, setTeams] = useState([]);
 
-  const [invitations, setInvitations] = useState([]);
+  const [invitations, setInvitations] = useState(null);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [teamName, setTeamName] = useState("");
   const [teamDescription, setTeamDescription] = useState("");
-
-  const [showJoinModal, setShowJoinModal] = useState(false);
-  const [joinCode, setjoinCode] = useState("");
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -97,21 +93,6 @@ function TeamsPage() {
     }
   };
 
-  // Unirse a equipo, falta por arreglar
-  const handleJoinTeam = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await makeRequest("/member/invite/join", "POST", {
-        id_team: joinCode,
-      });
-
-      alert("Solicitud enviada");
-      setShowJoinModal(false);
-    } catch (err) {
-      alert("Error al unirse al equipo");
-    }
-  };
-
   // Aceptar / Rechazar
   const handleAcceptInvite = async (teamId) => {
     await acceptInvite(teamId, user.user_id);
@@ -122,20 +103,6 @@ function TeamsPage() {
   const handleRejectInvite = async (teamId) => {
     await rejectInvite(teamId, user.user_id);
     await loadData();
-  };
-
-  // Abrir el modal de editar
-  const handleOpenEdit = (team) => {
-    setSelectedTeam(team);
-    setEditName(team.name);
-    setEditDescription(team.description);
-    setShowEditModal(true);
-  };
-
-  // Abrir el modal de eliminar
-  const handleOpenDelete = (team) => {
-    setSelectedTeam(team);
-    setShowDeleteModal(true);
   };
 
   // Update team
@@ -187,10 +154,6 @@ function TeamsPage() {
           <button className="btn-primary" onClick={() => setShowCreateModal(true)}>
             ➕ Crear equipo
           </button>
-
-          <button className="btn-secondary" onClick={() => setShowJoinModal(true)}>
-            🔗 Unirse a un equipo
-          </button>
         </div>
 
         {/* INVITACIONES ------------------------ */}
@@ -201,7 +164,7 @@ function TeamsPage() {
 
           {openInvites && (
             <div className="accordion-content">
-              {invitations.length === 0 ? (
+              {invitations === null ? (
                 <p className="empty-text">No tienes invitaciones pendientes.</p>
               ) : (
                 invitations.map(inv => (
@@ -231,8 +194,10 @@ function TeamsPage() {
 
           {openTeams && (
             <div className="accordion-content">
-              {teams.length > 0 ? (
-                teams.map(team => (
+            {invitations === null ? (
+              <p className="empty-text">Cargando equipos...</p>   // ← EVITA EL PARPADEO
+              ) : teams.length > 0 ? (
+                teams.filter(team => !invitations.some(inv => inv.id === team.id)).map(team => (
                   <div key={team.id} className="team-row">
 
                     <button
@@ -272,6 +237,13 @@ function TeamsPage() {
           )}
         </div>
 
+        <button
+          onClick={() => navigate("/profile")}
+          className="btn-profile"
+        >
+          Ir a mi Perfil
+        </button>
+
         <button className="btn-danger logout-btn" onClick={handleLogout}>
           🚪 Cerrar sesión
         </button>
@@ -297,31 +269,6 @@ function TeamsPage() {
 
               <button className="btn-primary" type="submit">Crear</button>
               <button className="btn-secondary" type="button" onClick={() => setShowCreateModal(false)}>
-                Cancelar
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL UNIRSE */}
-      {showJoinModal && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <h3>Unirse a un equipo</h3>
-
-            <form onSubmit={handleJoinTeam}>
-              <div className="form-group">
-                <label>ID del equipo</label>
-                <input type="text" value={joinCode} onChange={(e) => setJoinCode(e.target.value)} required />
-              </div>
-
-              <button className="btn-primary" type="submit">Unirse</button>
-              <button
-                className="btn-secondary"
-                type="button"
-                onClick={() => setShowJoinModal(false)}
-              >
                 Cancelar
               </button>
             </form>

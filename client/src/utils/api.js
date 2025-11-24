@@ -53,11 +53,17 @@ export const getProfile = () =>
 export const getUserProfile = (userId) =>
   makeRequest(`/profile/${userId}`, "GET");
 
+export const getUserProfilebyEmail = (email) =>
+  makeRequest(`/profile/email/${email}`, "GET");
+
 export const createProfile = (data) =>
   makeRequest("/profile", "POST", data);
 
 export const updateProfile = (data) =>
   makeRequest("/profile", "PUT", data);
+
+export const deleteProfile = () =>
+  makeRequest("/profile", "DELETE");
 
 // ======================================================
 //  TEAMS
@@ -109,9 +115,15 @@ export const updateMemberRole = (userId, teamId, role) =>
     role,
   });
 
-// Solicitar unirse mediante código
-export const joinTeam = (teamId) =>
-  makeRequest("/member/invite/join", "POST", {
+export const deleteMember = (userId, teamId) =>
+  makeRequest("/member", "DELETE", {
+    id_user: userId,
+    id_team: teamId,
+  });
+
+export const leaveTeam = (userId, teamId) =>
+  makeRequest("/member/leave", "DELETE", {
+    id_user: userId,
     id_team: teamId,
   });
 
@@ -134,7 +146,6 @@ export const updateTask = (taskId, updatedTask) =>
 // Eliminar tarea
 export const deleteTask = (taskId) =>
   makeRequest(`/task/${taskId}`, "DELETE");
-
 
 // ======================================================
 //  NOTIFICATIONS

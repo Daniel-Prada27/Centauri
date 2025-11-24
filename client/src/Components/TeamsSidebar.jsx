@@ -11,21 +11,17 @@ import {
   createTeam,
   acceptInvite,
   rejectInvite,
-  makeRequest
 } from "../utils/api";
 
 export default function TeamsSidebar() {
   const [user, setUser] = useState(null);
   const [teams, setTeams] = useState([]);
 
-  const [invitations, setInvitations] = useState([]);
+  const [invitations, setInvitations] = useState(null);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [teamName, setTeamName] = useState("");
   const [teamDescription, setTeamDescription] = useState("");
-
-  const [showJoinModal, setShowJoinModal] = useState(false);
-  const [joinCode, setjoinCode] = useState("");
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -95,22 +91,6 @@ export default function TeamsSidebar() {
     }
   };
 
-  // Unirse a equipo
-  const handleJoinTeam = async (e) => {
-    e.preventDefault();
-
-    try {
-      await makeRequest("/member/invite/join", "POST", {
-        id_team: joinCode,
-      });
-
-      alert("Solicitud enviada");
-      setShowJoinModal(false);
-    } catch {
-      alert("Error al unirse al equipo");
-    }
-  };
-
   // Aceptar invitación
   const handleAcceptInvite = async (teamId) => {
     await acceptInvite(teamId, user.user_id);
@@ -166,10 +146,6 @@ export default function TeamsSidebar() {
         <button className="btn-primary" onClick={() => setShowCreateModal(true)}>
           ➕ Crear equipo
         </button>
-
-        <button className="btn-secondary" onClick={() => setShowJoinModal(true)}>
-          🔗 Unirse a un equipo
-        </button>
       </div>
 
       {/* INVITACIONES PENDIENTES */}
@@ -180,7 +156,7 @@ export default function TeamsSidebar() {
 
         {openInvites && (
           <div className="accordion-content">
-            {invitations.length === 0 ? (
+            {invitations === null ? (
               <p className="empty-text">No tienes invitaciones pendientes.</p>
             ) : (
               invitations.map(inv => (
@@ -210,8 +186,10 @@ export default function TeamsSidebar() {
 
         {openTeams && (
           <div className="accordion-content teams-scroll-area">
-            {teams.length > 0 ? (
-              teams.map(team => (
+          {invitations === null ? (
+            <p className="empty-text">Cargando equipos...</p>   // ← EVITA EL PARPADEO
+            ) : teams.length > 0 ? (
+              teams.filter(team => !invitations.some(inv => inv.id === team.id)).map(team => (
                 <div key={team.id} className="team-row">
 
                   <button
@@ -252,8 +230,6 @@ export default function TeamsSidebar() {
         )}
       </div>
 
-      
-
       {/* MODALES */}
       {showCreateModal && (
         <div className="modal-overlay">
@@ -269,22 +245,6 @@ export default function TeamsSidebar() {
 
               <button className="btn-primary" type="submit">Crear</button>
               <button className="btn-secondary" onClick={() => setShowCreateModal(false)}>Cancelar</button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {showJoinModal && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <h3>Unirse a un equipo</h3>
-
-            <form onSubmit={handleJoinTeam}>
-              <label>ID del equipo</label>
-              <input type="text" value={joinCode} onChange={(e) => setjoinCode(e.target.value)} required />
-
-              <button className="btn-primary" type="submit">Unirse</button>
-              <button className="btn-secondary" onClick={() => setShowJoinModal(false)}>Cancelar</button>
             </form>
           </div>
         </div>
