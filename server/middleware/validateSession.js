@@ -9,26 +9,31 @@ export const validateSession = async (req, res, next) => {
             headers: req.headers
         });
 
-        if (session) {
-            
-            console.log(session.session.userId);
-            const userId = session.session.userId
-
-            const { accessToken } = await auth.api.getAccessToken({
-                body: {
-                    providerId: "google", // or any other provider id
-                    // accountId: "accountId", // optional, if you want to get the access token for a specific account
-                    userId: userId, // optional, if you don't provide headers with authenticated token
-                },
-            })
-            // console.log("GOT IT");
-            session.session.accessToken = accessToken
-            req.session = session;
-            // console.log(req.session);
-            next();
-        } else {
+        if (!session) {
             return res.status(401).json({ message: "No valid session found." });
         }
+
+        console.log(session.session.userId);
+        const userId = session.session.userId
+
+        const { accessToken } = await auth.api.getAccessToken({
+            body: {
+                providerId: "google", // or any other provider id
+                // accountId: "accountId", // optional, if you want to get the access token for a specific account
+                userId: userId, // optional, if you don't provide headers with authenticated token
+            },
+        })
+        // console.log("GOT IT");
+        session.session.accessToken = accessToken
+
+
+
+        req.session = session;
+        req.user_id = session.user.id;
+        req.user = session.user;
+
+        next();
+
     } catch (error) {
         console.error("Error retrieving session:", error);
         return res.status(500).json({ message: "Server error", error: error.message });
