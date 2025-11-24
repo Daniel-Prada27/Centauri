@@ -194,7 +194,7 @@ function TeamsPage() {
 
           {openTeams && (
             <div className="accordion-content">
-            {invitations === null ? (
+            {teams === null ? (
               <p className="empty-text">Cargando equipos...</p>   // ← EVITA EL PARPADEO
               ) : teams.length > 0 ? (
                 teams.filter(team => !invitations.some(inv => inv.id === team.id)).map(team => (
